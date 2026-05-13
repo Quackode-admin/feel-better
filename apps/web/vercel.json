@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd ../.. && pnpm install",
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile --ignore-scripts",
   "buildCommand": "cd ../.. && pnpm --filter web build",
-  "outputDirectory": ".next"
+  "outputDirectory": "apps/web/.next"
 }
