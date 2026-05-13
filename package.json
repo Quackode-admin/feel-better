@@ -18,7 +18,6 @@
     "db:studio": "pnpm --filter api-core db:studio"
   },
   "devDependencies": {
-    "turbo": "^2.0.0",
     "prettier": "^3.3.0",
     "typescript": "^5.5.0"
   },
