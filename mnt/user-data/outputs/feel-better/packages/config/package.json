@@ -1,0 +1,13 @@
+{
+  "name": "@feel-better/config",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared configuration: ESLint, TypeScript, Tailwind",
+  "main": "index.js",
+  "files": [
+    "eslint-next.js",
+    "eslint-nest.js",
+    "tailwind.config.base.js",
+    "tsconfig"
+  ]
+}

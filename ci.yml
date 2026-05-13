@@ -1,0 +1,169 @@
+# =============================================================================
+# Feel Better — Pipeline CI/CD
+# =============================================================================
+# Se ejecuta en: pull requests y push a develop, staging, main
+# =============================================================================
+
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [develop, staging, main]
+  push:
+    branches: [develop, staging, main]
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # ===========================================================================
+  # CI — Lint, typecheck, tests (en paralelo con Turborepo)
+  # ===========================================================================
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Necesario para --filter=[HEAD^1] de Turborepo
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm turbo lint --filter=[HEAD^1]
+
+      - name: Typecheck
+        run: pnpm turbo typecheck --filter=[HEAD^1]
+
+      - name: Test
+        run: pnpm turbo test --filter=[HEAD^1]
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/feel_better_test
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: feel_better_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+  # ===========================================================================
+  # Security scan — Snyk (solo en push, no en PRs de forks)
+  # ===========================================================================
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Snyk
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # ===========================================================================
+  # Deploy development — push a develop
+  # ===========================================================================
+  deploy-development:
+    name: Deploy → development
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Deploy to Railway (development)
+        uses: berviantoleo/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.DEV_RAILWAY_TOKEN }}
+          service: api-core
+
+  # ===========================================================================
+  # Deploy staging — push a staging
+  # ===========================================================================
+  deploy-staging:
+    name: Deploy → staging
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Deploy to Railway (staging)
+        uses: berviantoleo/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.STG_RAILWAY_TOKEN }}
+          service: api-core
+      - name: Run E2E tests
+        run: pnpm turbo test:e2e
+        env:
+          E2E_BASE_URL: ${{ secrets.STG_API_URL }}
+
+  # ===========================================================================
+  # Deploy production — push a main (requiere aprobación manual)
+  # ===========================================================================
+  deploy-production:
+    name: Deploy → production
+    needs: [ci, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production  # <-- configura el reviewer en GitHub Environments
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Deploy to Railway (production)
+        uses: berviantoleo/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.PROD_RAILWAY_TOKEN }}
+          service: api-core
+      - name: Smoke tests post-deploy
+        run: |
+          sleep 30
+          curl --fail ${{ secrets.PROD_API_URL }}/api/v1/health || exit 1

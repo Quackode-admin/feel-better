@@ -1,0 +1,317 @@
+// =============================================================================
+// Feel Better — Prisma Schema
+// =============================================================================
+// Para aplicar cambios:
+//   pnpm --filter api-core db:migrate:dev --name nombre_del_cambio
+// Para producción:
+//   pnpm --filter api-core db:migrate
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  admin
+  nutritionist
+  patient
+  guardian
+}
+
+enum Gender {
+  female
+  male
+  other
+  prefer_not_to_say
+}
+
+enum AppointmentStatus {
+  scheduled
+  confirmed
+  cancelled
+  completed
+  no_show
+}
+
+enum NutritionPlanStatus {
+  draft
+  active
+  paused
+  completed
+}
+
+enum DocumentType {
+  lab_result
+  medical_image
+  prescription
+  consent
+  other
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         Role
+  isActive     Boolean   @default(true) @map("is_active")
+
+  profile      Profile?
+  patient      Patient?
+  nutritionist Nutritionist?
+  guardian     Guardian?
+
+  // Audit fields — obligatorios en todas las tablas
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@index([email])
+  @@map("users")
+}
+
+model Profile {
+  id        String    @id @default(uuid())
+  userId    String    @unique @map("user_id")
+  fullName  String    @map("full_name")
+  birthDate DateTime? @map("birth_date")
+  gender    Gender?
+  avatarUrl String?   @map("avatar_url")
+  phone     String?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdById String? @map("created_by_id")
+  updatedById String? @map("updated_by_id")
+
+  @@map("profiles")
+}
+
+// ─── Patients ────────────────────────────────────────────────────────────────
+
+model Patient {
+  id                  String        @id @default(uuid())
+  userId              String        @unique @map("user_id")
+  nutritionistId      String?       @map("nutritionist_id")
+  heightCm            Decimal?      @map("height_cm") @db.Decimal(5, 1)
+  initialWeightKg     Decimal?      @map("initial_weight_kg") @db.Decimal(6, 2)
+  targetWeightKg      Decimal?      @map("target_weight_kg") @db.Decimal(6, 2)
+  allergies           String?
+  dietaryRestrictions String[]      @map("dietary_restrictions")
+  medicalConditions   String?       @map("medical_conditions")
+  currentMedications  String?       @map("current_medications")
+  medicalNotes        String?       @map("medical_notes")
+
+  user                User          @relation(fields: [userId], references: [id])
+  nutritionist        Nutritionist? @relation(fields: [nutritionistId], references: [id])
+  weightRecords       WeightRecord[]
+  nutritionPlans      NutritionPlan[]
+  appointments        Appointment[]
+  documents           Document[]
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@index([nutritionistId])
+  @@map("patients")
+}
+
+model Nutritionist {
+  id             String      @id @default(uuid())
+  userId         String      @unique @map("user_id")
+  licenseNumber  String?     @map("license_number")
+  specialties    String[]
+  bio            String?
+
+  user           User        @relation(fields: [userId], references: [id])
+  patients       Patient[]
+  appointments   Appointment[]
+  nutritionPlans NutritionPlan[]
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@map("nutritionists")
+}
+
+// ─── Tracking ────────────────────────────────────────────────────────────────
+
+model WeightRecord {
+  id           String   @id @default(uuid())
+  patientId    String   @map("patient_id")
+  weightKg     Decimal  @map("weight_kg") @db.Decimal(6, 2)
+  bmi          Decimal? @db.Decimal(5, 2)
+  bodyFatPct   Decimal? @map("body_fat_pct") @db.Decimal(5, 2)
+  recordedAt   DateTime @map("recorded_at")
+  notes        String?
+
+  patient      Patient  @relation(fields: [patientId], references: [id])
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@index([patientId, recordedAt])
+  @@map("weight_records")
+}
+
+// ─── Nutrition ────────────────────────────────────────────────────────────────
+
+model NutritionPlan {
+  id               String              @id @default(uuid())
+  patientId        String              @map("patient_id")
+  nutritionistId   String              @map("nutritionist_id")
+  title            String
+  description      String?
+  caloriesTarget   Int?                @map("calories_target")
+  proteinGrams     Int?                @map("protein_grams")
+  carbsGrams       Int?                @map("carbs_grams")
+  fatGrams         Int?                @map("fat_grams")
+  startDate        DateTime            @map("start_date")
+  endDate          DateTime?           @map("end_date")
+  status           NutritionPlanStatus @default(draft)
+
+  patient          Patient             @relation(fields: [patientId], references: [id])
+  nutritionist     Nutritionist        @relation(fields: [nutritionistId], references: [id])
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@index([patientId])
+  @@index([nutritionistId])
+  @@map("nutrition_plans")
+}
+
+// ─── Appointments ─────────────────────────────────────────────────────────────
+
+model Appointment {
+  id               String            @id @default(uuid())
+  patientId        String            @map("patient_id")
+  nutritionistId   String            @map("nutritionist_id")
+  scheduledAt      DateTime          @map("scheduled_at")
+  durationMin      Int               @default(60) @map("duration_min")
+  status           AppointmentStatus @default(scheduled)
+  sessionNotes     String?           @map("session_notes")
+  cancelledReason  String?           @map("cancelled_reason")
+
+  patient          Patient           @relation(fields: [patientId], references: [id])
+  nutritionist     Nutritionist      @relation(fields: [nutritionistId], references: [id])
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@index([patientId])
+  @@index([nutritionistId])
+  @@index([scheduledAt])
+  @@map("appointments")
+}
+
+// ─── Documents ────────────────────────────────────────────────────────────────
+
+model Document {
+  id           String       @id @default(uuid())
+  patientId    String       @map("patient_id")
+  type         DocumentType
+  r2Key        String       @map("r2_key")
+  originalName String       @map("original_name")
+  mimeType     String       @map("mime_type")
+  sizeBytes    Int          @map("size_bytes")
+  isPublic     Boolean      @default(false) @map("is_public")
+
+  patient      Patient      @relation(fields: [patientId], references: [id])
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@index([patientId])
+  @@map("documents")
+}
+
+// ─── Chat ─────────────────────────────────────────────────────────────────────
+
+model ChatChannel {
+  id                String         @id @default(uuid())
+  streamChannelId   String         @unique @map("stream_channel_id")
+  patientId         String         @map("patient_id")
+  nutritionistId    String         @map("nutritionist_id")
+  createdById       String         @map("created_by_id")
+
+  auditLogs         ChatAuditLog[]
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdByUserId String? @map("created_by_user_id")
+  updatedByUserId String? @map("updated_by_user_id")
+
+  @@index([patientId])
+  @@index([nutritionistId])
+  @@map("chat_channels")
+}
+
+model ChatAuditLog {
+  id                String      @id @default(uuid())
+  eventType         String      @map("event_type")
+  streamChannelId   String      @map("stream_channel_id")
+  streamUserId      String?     @map("stream_user_id")
+  messageId         String?     @map("message_id")
+  payload           Json
+
+  channel           ChatChannel @relation(fields: [streamChannelId], references: [streamChannelId])
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdByUserId String? @map("created_by_user_id")
+  updatedByUserId String? @map("updated_by_user_id")
+
+  @@index([streamChannelId])
+  @@index([eventType])
+  @@map("chat_audit_logs")
+}
+
+// ─── Guardian ─────────────────────────────────────────────────────────────────
+
+model Guardian {
+  id       String @id @default(uuid())
+  userId   String @unique @map("user_id")
+  user     User   @relation(fields: [userId], references: [id])
+
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+  createdById  String?   @map("created_by_id")
+  updatedById  String?   @map("updated_by_id")
+
+  @@map("guardians")
+}

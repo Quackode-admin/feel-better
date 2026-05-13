@@ -1,0 +1,50 @@
+{
+  "name": "api-core",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "nest build",
+    "start": "node dist/main",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "ts-node prisma/seed.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.3.0",
+    "@nestjs/core": "^10.3.0",
+    "@nestjs/platform-express": "^10.3.0",
+    "@nestjs/config": "^3.2.0",
+    "@nestjs/jwt": "^10.2.0",
+    "@nestjs/passport": "^10.0.3",
+    "@nestjs/swagger": "^7.4.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "@prisma/client": "^5.16.0",
+    "class-validator": "^0.14.1",
+    "class-transformer": "^0.5.1",
+    "bcryptjs": "^2.4.3",
+    "stream-chat": "^8.34.0",
+    "@upstash/redis": "^1.32.0",
+    "helmet": "^7.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "@feel-better/types": "workspace:*",
+    "@feel-better/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.0",
+    "@nestjs/testing": "^10.3.0",
+    "@feel-better/config": "workspace:*",
+    "@types/bcryptjs": "^2.4.6",
+    "prisma": "^5.16.0",
+    "typescript": "*",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  }
+}
