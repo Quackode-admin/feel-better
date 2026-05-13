@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm --filter api-core db:generate
-RUN cd services/api-core && npx nest build
+RUN ./node_modules/.bin/nest build --path services/api-core/tsconfig.json
 
 FROM node:20-alpine AS runner
 WORKDIR /app
