@@ -1,0 +1,16 @@
+node_modules
+.next
+dist
+.turbo
+out
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+coverage
+*.log
+.DS_Store
+.vercel
+.expo
