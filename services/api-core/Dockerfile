@@ -9,14 +9,15 @@ COPY packages/logger/package.json ./packages/logger/
 COPY packages/config/package.json ./packages/config/
 COPY packages/validators/package.json ./packages/validators/
 COPY services/api-core/package.json ./services/api-core/
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --dev
 
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/services/api-core/node_modules ./services/api-core/node_modules
 COPY . .
 RUN pnpm --filter api-core db:generate
-RUN ./node_modules/.bin/nest build --path services/api-core/tsconfig.json
+RUN cd services/api-core && ../../node_modules/.bin/nest build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
