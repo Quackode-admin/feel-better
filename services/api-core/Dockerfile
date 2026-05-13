@@ -17,8 +17,9 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN cd services/api-core && node ../../node_modules/.bin/prisma generate
-RUN cd services/api-core && node ../../node_modules/.bin/nest build
+WORKDIR /app/services/api-core
+RUN ../../node_modules/.bin/prisma generate
+RUN ../../node_modules/.bin/nest build
 
 FROM node:20-alpine AS runner
 RUN apk add --no-cache openssl
@@ -29,4 +30,4 @@ COPY --from=builder /app/services/api-core/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/services/api-core/package.json ./
 EXPOSE 3000
-CMD ["sh", "-c", "node node_modules/.bin/prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "../../node_modules/.bin/prisma migrate deploy && node dist/main"]
