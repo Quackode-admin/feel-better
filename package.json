@@ -24,6 +24,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@clerk/shared",
       "@nestjs/core",
       "@prisma/client",
       "@prisma/engines",
