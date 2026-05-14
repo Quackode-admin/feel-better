@@ -1,5 +1,6 @@
 {
+  "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile --ignore-scripts",
-  "buildCommand": "cd ../.. && pnpm --filter web exec next build",
+  "buildCommand": "next build",
   "outputDirectory": ".next"
 }
