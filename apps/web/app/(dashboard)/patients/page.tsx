@@ -50,7 +50,6 @@ export default function PatientsPage() {
           </DialogContent>
         </Dialog>
       </div>
-
       <PatientList />
     </div>
   )
