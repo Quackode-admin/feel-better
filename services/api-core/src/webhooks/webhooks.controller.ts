@@ -3,7 +3,6 @@ import {
   Post,
   Headers,
   Body,
-  Req,
   HttpCode,
   BadRequestException,
 } from '@nestjs/common'
@@ -44,26 +43,22 @@ export class WebhooksController {
       const email = data.email_addresses?.[0]?.email_address
       const firstName = data.first_name ?? ''
       const lastName = data.last_name ?? ''
+      const fullName = `${firstName} ${lastName}`.trim() || email
 
       await this.prisma.user.upsert({
         where: { email },
         create: {
           id: data.id,
           email,
-          passwordHash: '',
           role: 'patient',
           isActive: true,
           profile: {
-            create: {
-              fullName: `${firstName} ${lastName}`.trim() || email,
-            },
+            create: { fullName },
           },
         },
         update: {
           profile: {
-            update: {
-              fullName: `${firstName} ${lastName}`.trim() || email,
-            },
+            update: { fullName },
           },
         },
       })
