@@ -31,15 +31,13 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    createPatient(
-      {
-        ...form,
-        heightCm: form.heightCm ? parseFloat(form.heightCm) : undefined,
-        initialWeightKg: form.initialWeightKg ? parseFloat(form.initialWeightKg) : undefined,
-        targetWeightKg: form.targetWeightKg ? parseFloat(form.targetWeightKg) : undefined,
-      },
-      { onSuccess },
-    )
+    createPatient({
+      ...form,
+      heightCm: form.heightCm ? parseFloat(form.heightCm) : undefined,
+      initialWeightKg: form.initialWeightKg ? parseFloat(form.initialWeightKg) : undefined,
+      targetWeightKg: form.targetWeightKg ? parseFloat(form.targetWeightKg) : undefined,
+    })
+    onSuccess?.()
   }
 
   return (
@@ -47,95 +45,42 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="fullName">Nombre completo *</Label>
-          <Input
-            id="fullName"
-            name="fullName"
-            value={form.fullName}
-            onChange={handleChange}
-            required
-          />
+          <Input id="fullName" name="fullName" value={form.fullName} onChange={handleChange} required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Correo electrónico *</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
+          <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="phone">Teléfono</Label>
-          <Input
-            id="phone"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-          />
+          <Input id="phone" name="phone" value={form.phone} onChange={handleChange} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="birthDate">Fecha de nacimiento</Label>
-          <Input
-            id="birthDate"
-            name="birthDate"
-            type="date"
-            value={form.birthDate}
-            onChange={handleChange}
-          />
+          <Input id="birthDate" name="birthDate" type="date" value={form.birthDate} onChange={handleChange} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="heightCm">Altura (cm)</Label>
-          <Input
-            id="heightCm"
-            name="heightCm"
-            type="number"
-            value={form.heightCm}
-            onChange={handleChange}
-          />
+          <Input id="heightCm" name="heightCm" type="number" value={form.heightCm} onChange={handleChange} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="initialWeightKg">Peso inicial (kg)</Label>
-          <Input
-            id="initialWeightKg"
-            name="initialWeightKg"
-            type="number"
-            value={form.initialWeightKg}
-            onChange={handleChange}
-          />
+          <Input id="initialWeightKg" name="initialWeightKg" type="number" value={form.initialWeightKg} onChange={handleChange} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="targetWeightKg">Peso objetivo (kg)</Label>
-          <Input
-            id="targetWeightKg"
-            name="targetWeightKg"
-            type="number"
-            value={form.targetWeightKg}
-            onChange={handleChange}
-          />
+          <Input id="targetWeightKg" name="targetWeightKg" type="number" value={form.targetWeightKg} onChange={handleChange} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="allergies">Alergias</Label>
-          <Input
-            id="allergies"
-            name="allergies"
-            value={form.allergies}
-            onChange={handleChange}
-          />
+          <Input id="allergies" name="allergies" value={form.allergies} onChange={handleChange} />
         </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor="medicalNotes">Notas médicas</Label>
-        <Textarea
-          id="medicalNotes"
-          name="medicalNotes"
-          value={form.medicalNotes}
-          onChange={handleChange}
-          rows={3}
-        />
+        <Textarea id="medicalNotes" name="medicalNotes" value={form.medicalNotes} onChange={handleChange} rows={3} />
       </div>
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
           {isPending ? 'Guardando...' : 'Crear paciente'}
         </Button>
