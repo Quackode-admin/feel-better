@@ -7,16 +7,24 @@ import { RedisModule } from './redis/redis.module'
 import { FilesModule } from './files/files.module'
 import { UsersModule } from './users/users.module'
 import { PatientsModule } from './patients/patients.module'
+import { NutritionModule } from './nutrition/nutrition.module'
+import { AppointmentsModule } from './appointments/appointments.module'
+import { TrackingModule } from './tracking/tracking.module'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
     SharedModule,
     RedisModule,
+    AuthModule,
     WebhooksModule,
     FilesModule,
     UsersModule,
     PatientsModule,
+    NutritionModule,
+    AppointmentsModule,
+    TrackingModule,
   ],
   controllers: [AppController],
 })
