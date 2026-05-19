@@ -37,7 +37,7 @@ export class ClerkAuthGuard implements CanActivate {
         fullName: user.profile?.fullName,
       }
 
-      console.warn('ClerkAuthGuard - user loaded:', request.auth.email, request.auth.role)
+      
 
       return true
     } catch (e: any) {

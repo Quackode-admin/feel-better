@@ -10,7 +10,7 @@ export class PatientsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(requestingUser: any) {
-    console.warn('findAll - requestingUser:', JSON.stringify(requestingUser))
+    
     const where: any = { deletedAt: null }
 
     if (requestingUser.role === 'nutritionist') {
@@ -59,7 +59,7 @@ export class PatientsService {
   }
 
   async create(data: any, requestingUser: any) {
-    console.warn('create - requestingUser:', JSON.stringify(requestingUser))
+    
     if (!['nutritionist', 'admin'].includes(requestingUser.role)) {
       throw new ForbiddenException('No tienes permisos para crear pacientes')
     }
