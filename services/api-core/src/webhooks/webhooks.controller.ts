@@ -46,9 +46,9 @@ export class WebhooksController {
       const fullName = `${firstName} ${lastName}`.trim() || email
 
       await this.prisma.user.upsert({
-        where: { email },
+        where: { clerkId: data.id },
         create: {
-          id: data.id,
+          clerkId: data.id,
           email,
           role: 'patient',
           isActive: true,
@@ -57,6 +57,7 @@ export class WebhooksController {
           },
         },
         update: {
+          email,
           profile: {
             update: { fullName },
           },
@@ -68,7 +69,7 @@ export class WebhooksController {
 
     if (type === 'user.deleted') {
       await this.prisma.user.updateMany({
-        where: { id: data.id },
+        where: { clerkId: data.id },
         data: { deletedAt: new Date(), isActive: false },
       })
       console.warn('Usuario desactivado en DB:', data.id)
