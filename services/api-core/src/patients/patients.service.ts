@@ -2,15 +2,16 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common'
 import { PrismaService } from '../shared/prisma.service'
+import { Prisma } from '@prisma/client'
 
 @Injectable()
 export class PatientsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(requestingUser: any) {
-    
     const where: any = { deletedAt: null }
 
     if (requestingUser.role === 'nutritionist') {
@@ -59,50 +60,64 @@ export class PatientsService {
   }
 
   async create(data: any, requestingUser: any) {
-    
     if (!['nutritionist', 'admin'].includes(requestingUser.role)) {
       throw new ForbiddenException('No tienes permisos para crear pacientes')
+    }
+
+    // Verificar si el email ya existe
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    })
+    if (existingUser) {
+      throw new ConflictException('Ya existe un usuario con ese correo electrónico')
     }
 
     const nutritionist = await this.prisma.nutritionist.findUnique({
       where: { userId: requestingUser.dbId },
     })
 
-    return this.prisma.patient.create({
-      data: {
-        user: {
-          create: {
-            clerkId: `pending_${Date.now()}`,
-            email: data.email,
-            role: 'patient',
-            isActive: true,
-            profile: {
-              create: {
-                fullName: data.fullName,
-                ...(data.birthDate && { birthDate: new Date(data.birthDate) }),
-                ...(data.gender && { gender: data.gender }),
-                ...(data.phone && { phone: data.phone }),
+    try {
+      return await this.prisma.patient.create({
+        data: {
+          user: {
+            create: {
+              clerkId: `pending_${Date.now()}`,
+              email: data.email,
+              role: 'patient',
+              isActive: true,
+              profile: {
+                create: {
+                  fullName: data.fullName,
+                  ...(data.birthDate && { birthDate: new Date(data.birthDate) }),
+                  ...(data.gender && { gender: data.gender }),
+                  ...(data.phone && { phone: data.phone }),
+                },
               },
             },
           },
+          ...(nutritionist && {
+            nutritionist: { connect: { id: nutritionist.id } },
+          }),
+          ...(data.heightCm && { heightCm: data.heightCm }),
+          ...(data.initialWeightKg && { initialWeightKg: data.initialWeightKg }),
+          ...(data.targetWeightKg && { targetWeightKg: data.targetWeightKg }),
+          ...(data.allergies && { allergies: data.allergies }),
+          dietaryRestrictions: data.dietaryRestrictions ?? [],
+          ...(data.medicalConditions && { medicalConditions: data.medicalConditions }),
+          ...(data.currentMedications && { currentMedications: data.currentMedications }),
+          ...(data.medicalNotes && { medicalNotes: data.medicalNotes }),
+          createdById: requestingUser.dbId,
         },
-        ...(nutritionist && {
-          nutritionist: { connect: { id: nutritionist.id } },
-        }),
-        ...(data.heightCm && { heightCm: data.heightCm }),
-        ...(data.initialWeightKg && { initialWeightKg: data.initialWeightKg }),
-        ...(data.targetWeightKg && { targetWeightKg: data.targetWeightKg }),
-        ...(data.allergies && { allergies: data.allergies }),
-        dietaryRestrictions: data.dietaryRestrictions ?? [],
-        ...(data.medicalConditions && { medicalConditions: data.medicalConditions }),
-        ...(data.currentMedications && { currentMedications: data.currentMedications }),
-        ...(data.medicalNotes && { medicalNotes: data.medicalNotes }),
-        createdById: requestingUser.dbId,
-      },
-      include: {
-        user: { include: { profile: true } },
-      },
-    })
+        include: {
+          user: { include: { profile: true } },
+        },
+      })
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        throw new ConflictException('Ya existe un usuario con ese correo electrónico')
+      }
+      throw e
+    }
   }
 
   async update(id: string, data: any, requestingUser: any) {
