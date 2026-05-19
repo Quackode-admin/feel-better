@@ -7,33 +7,36 @@ import { AppModule } from './app.module'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
-    rawBody: true,  // necesario para verificar firma de webhooks Svix/Clerk
   })
 
-  // ── Seguridad ────────────────────────────────────────────────────────────────
   app.use(helmet())
+
   app.enableCors({
-    origin: process.env['ALLOWED_ORIGINS']?.split(',') ?? ['http://localhost:3002'],
+    origin: [
+      'http://localhost:3002',
+      'http://localhost:3000',
+      /\.vercel\.app$/,
+      /\.railway\.app$/,
+      process.env['FRONTEND_URL'] ?? '',
+    ].filter(Boolean),
     credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 
-  // ── Prefijo global de API ─────────────────────────────────────────────────────
   app.setGlobalPrefix('api/v1')
 
-  // ── Validación global de DTOs ─────────────────────────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,        // elimina campos no declarados en el DTO
-      forbidNonWhitelisted: true,
-      transform: true,        // transforma strings a tipos correctos
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      transform: true,
       transformOptions: { enableImplicitConversion: true },
     }),
   )
 
-  // ── Serialización global (respeta @Exclude en DTOs) ───────────────────────────
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
 
-  // ── Swagger (solo en desarrollo) ──────────────────────────────────────────────
   if (process.env['NODE_ENV'] !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Feel Better API')
@@ -43,7 +46,6 @@ async function bootstrap() {
       .build()
     const document = SwaggerModule.createDocument(app, config)
     SwaggerModule.setup('docs', app, document)
-    console.warn('Swagger disponible en http://localhost:3000/docs')
   }
 
   const port = process.env['PORT'] ?? 3000

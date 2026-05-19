@@ -1,22 +1,31 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { APP_GUARD } from '@nestjs/core'
 import { AppController } from './app.controller'
-import { PrismaModule } from './prisma/prisma.module'
+import { WebhooksModule } from './webhooks/webhooks.module'
+import { SharedModule } from './shared/shared.module'
+import { RedisModule } from './redis/redis.module'
+import { FilesModule } from './files/files.module'
 import { UsersModule } from './users/users.module'
+import { PatientsModule } from './patients/patients.module'
+import { NutritionModule } from './nutrition/nutrition.module'
+import { AppointmentsModule } from './appointments/appointments.module'
+import { TrackingModule } from './tracking/tracking.module'
 import { AuthModule } from './auth/auth.module'
-import { RolesGuard } from './auth/guards/roles.guard'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
-    PrismaModule,
-    UsersModule,
+    SharedModule,
+    RedisModule,
     AuthModule,
+    WebhooksModule,
+    FilesModule,
+    UsersModule,
+    PatientsModule,
+    NutritionModule,
+    AppointmentsModule,
+    TrackingModule,
   ],
   controllers: [AppController],
-  providers: [
-    { provide: APP_GUARD, useClass: RolesGuard },
-  ],
 })
 export class AppModule {}
