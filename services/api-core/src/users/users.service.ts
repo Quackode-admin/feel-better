@@ -1,44 +1,76 @@
-import { Injectable } from '@nestjs/common'
-import { PrismaService } from '../prisma/prisma.service'
-import { Role, User } from '@prisma/client'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { PrismaService } from '../shared/prisma.service'
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByClerkId(clerkId: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { clerkId } })
+  async findByClerkId(clerkId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { clerkId },
+      include: { profile: true },
+    })
+    if (!user) throw new NotFoundException('Usuario no encontrado')
+    return user
   }
 
-  async findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } })
+  async findById(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id, deletedAt: null },
+      include: { profile: true },
+    })
+    if (!user) throw new NotFoundException('Usuario no encontrado')
+    return user
   }
 
-  async createFromClerk(data: {
-    clerkId: string
-    email: string
-    role?: Role
-  }): Promise<User> {
-    return this.prisma.user.create({
+  async updateProfile(
+    clerkId: string,
+    data: {
+      fullName?: string
+      phone?: string
+      birthDate?: Date
+      gender?: string
+    },
+  ) {
+    const user = await this.findByClerkId(clerkId)
+
+    return this.prisma.profile.update({
+      where: { userId: user.id },
       data: {
-        clerkId: data.clerkId,
-        email: data.email,
-        role: data.role ?? Role.patient,
+        fullName: data.fullName,
+        phone: data.phone,
+        birthDate: data.birthDate,
+        gender: data.gender as any,
+        updatedById: user.id,
       },
     })
   }
 
-  async updateRole(clerkId: string, role: Role): Promise<User> {
-    return this.prisma.user.update({
-      where: { clerkId },
-      data: { role },
+  async findAllNutritionists() {
+    return this.prisma.user.findMany({
+      where: { role: 'nutritionist', deletedAt: null, isActive: true },
+      include: { profile: true, nutritionist: true },
     })
   }
 
-  async deactivate(clerkId: string): Promise<void> {
-    await this.prisma.user.update({
-      where: { clerkId },
-      data: { isActive: false },
+  async findAllPatients() {
+    return this.prisma.user.findMany({
+      where: { role: 'patient', deletedAt: null, isActive: true },
+      include: { profile: true, patient: true },
+    })
+  }
+
+  async deactivateUser(id: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { isActive: false, deletedAt: new Date() },
+    })
+  }
+
+  async changeRole(id: string, role: 'admin' | 'nutritionist' | 'patient' | 'guardian') {
+    return this.prisma.user.update({
+      where: { id },
+      data: { role },
     })
   }
 }

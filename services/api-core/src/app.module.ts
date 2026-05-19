@@ -5,6 +5,7 @@ import { WebhooksModule } from './webhooks/webhooks.module'
 import { SharedModule } from './shared/shared.module'
 import { RedisModule } from './redis/redis.module'
 import { FilesModule } from './files/files.module'
+import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { FilesModule } from './files/files.module'
     RedisModule,
     WebhooksModule,
     FilesModule,
+    UsersModule,
   ],
   controllers: [AppController],
 })
