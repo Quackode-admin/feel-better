@@ -5,6 +5,23 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useParams } from 'next/navigation'
 
+function formatDecimal(value: any): string {
+  if (value === null || value === undefined) return '—'
+  if (typeof value === 'object' && value !== null) {
+    return parseFloat(value.toString()).toString()
+  }
+  return value.toString()
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('es', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 export default function PatientDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: patient, isLoading } = usePatient(id)
@@ -37,10 +54,10 @@ export default function PatientDetailPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[
           { label: 'Teléfono', value: profile?.phone ?? '—' },
-          { label: 'Fecha de nacimiento', value: profile?.birthDate ? new Date(profile.birthDate).toLocaleDateString('es') : '—' },
-          { label: 'Altura', value: patient.heightCm ? `${patient.heightCm} cm` : '—' },
-          { label: 'Peso inicial', value: patient.initialWeightKg ? `${patient.initialWeightKg} kg` : '—' },
-          { label: 'Peso objetivo', value: patient.targetWeightKg ? `${patient.targetWeightKg} kg` : '—' },
+          { label: 'Fecha de nacimiento', value: formatDate(profile?.birthDate) },
+          { label: 'Altura', value: patient.heightCm ? `${formatDecimal(patient.heightCm)} cm` : '—' },
+          { label: 'Peso inicial', value: patient.initialWeightKg ? `${formatDecimal(patient.initialWeightKg)} kg` : '—' },
+          { label: 'Peso objetivo', value: patient.targetWeightKg ? `${formatDecimal(patient.targetWeightKg)} kg` : '—' },
           { label: 'Alergias', value: patient.allergies ?? '—' },
         ].map((item) => (
           <div key={item.label} className="rounded-lg border bg-card p-4">
