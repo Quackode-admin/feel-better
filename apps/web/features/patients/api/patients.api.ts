@@ -1,10 +1,7 @@
-function getApiUrl() {
-  const base = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3000'
-  return base.replace(/\/$/, '') // elimina barra final si existe
-}
+const API_URL = 'https://stellar-alignment-development.up.railway.app'
 
 export async function getPatientsApi(token: string) {
-  const res = await fetch(`${getApiUrl()}/api/v1/patients`, {
+  const res = await fetch(`${API_URL}/api/v1/patients`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) throw new Error('Error cargando pacientes')
@@ -12,7 +9,7 @@ export async function getPatientsApi(token: string) {
 }
 
 export async function createPatientApi(token: string, data: any) {
-  const res = await fetch(`${getApiUrl()}/api/v1/patients`, {
+  const res = await fetch(`${API_URL}/api/v1/patients`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -20,12 +17,15 @@ export async function createPatientApi(token: string, data: any) {
     },
     body: JSON.stringify(data),
   })
-  if (!res.ok) throw new Error('Error creando paciente')
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message ?? `Error ${res.status}`)
+  }
   return res.json()
 }
 
 export async function getPatientByIdApi(token: string, id: string) {
-  const res = await fetch(`${getApiUrl()}/api/v1/patients/${id}`, {
+  const res = await fetch(`${API_URL}/api/v1/patients/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) throw new Error('Error cargando paciente')
