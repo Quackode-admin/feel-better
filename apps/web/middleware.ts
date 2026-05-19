@@ -1,9 +1,5 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
-
-export default clerkMiddleware()
+export { default } from 'next/dist/server/app-render/action-async-storage.external'
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: [],
 }
