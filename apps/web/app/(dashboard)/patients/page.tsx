@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { UserPlus } from 'lucide-react'
 
 export default function PatientsPage() {
   const [open, setOpen] = useState(false)
@@ -19,23 +20,37 @@ export default function PatientsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold">Pacientes</h2>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--green-950)', letterSpacing: '-0.02em' }}>
+            Pacientes
+          </h2>
+          <p className="text-sm mt-1" style={{ color: 'var(--ink-500)' }}>
             Gestiona tus pacientes y su información clínica
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>+ Nuevo paciente</Button>
+            <Button
+              className="flex items-center gap-2"
+              style={{ backgroundColor: 'var(--green-950)', color: 'white' }}
+            >
+              <UserPlus size={16} />
+              Nuevo paciente
+            </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Crear nuevo paciente</DialogTitle>
+              <DialogTitle
+                className="text-lg font-bold"
+                style={{ color: 'var(--green-950)' }}
+              >
+                Crear nuevo paciente
+              </DialogTitle>
             </DialogHeader>
             <CreatePatientForm onSuccess={() => setOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
+
       <PatientList />
     </div>
   )
