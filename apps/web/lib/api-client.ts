@@ -1,22 +1,23 @@
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3000'
+export const API_URL = 'https://stellar-alignment-development.up.railway.app'
 
-export async function fetchApi<T>(
+export async function apiRequest<T>(
   path: string,
+  token: string,
   options: RequestInit = {},
-  token?: string,
 ): Promise<T> {
-  const response = await fetch(`${API_URL}/api/v1${path}`, {
+  const res = await fetch(`${API_URL}/api/v1${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
   })
 
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`)
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message ?? `Error ${res.status}`)
   }
 
-  return response.json()
+  return res.json()
 }
