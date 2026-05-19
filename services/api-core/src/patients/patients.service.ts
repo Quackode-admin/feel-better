@@ -9,7 +9,6 @@ import { PrismaService } from '../shared/prisma.service'
 export class PatientsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // Solo el nutricionista asignado o admin puede ver los pacientes
   async findAll(requestingUser: any) {
     const where: any = { deletedAt: null }
 
@@ -48,20 +47,17 @@ export class PatientsService {
     })
 
     if (!patient) throw new NotFoundException('Paciente no encontrado')
-
-    // Verificar acceso
     await this.verifyAccess(patient, requestingUser)
 
-    // Ocultar notas médicas al paciente
     if (requestingUser.role === 'patient') {
-      return { ...patient, medicalNotes: undefined, sessionNotes: undefined }
+      const { medicalNotes, ...rest } = patient as any
+      return rest
     }
 
     return patient
   }
 
   async create(data: any, requestingUser: any) {
-    // Solo nutricionistas y admins pueden crear pacientes
     if (!['nutritionist', 'admin'].includes(requestingUser.role)) {
       throw new ForbiddenException('No tienes permisos para crear pacientes')
     }
@@ -81,24 +77,24 @@ export class PatientsService {
             profile: {
               create: {
                 fullName: data.fullName,
-                birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
-                gender: data.gender,
-                phone: data.phone,
+                ...(data.birthDate && { birthDate: new Date(data.birthDate) }),
+                ...(data.gender && { gender: data.gender }),
+                ...(data.phone && { phone: data.phone }),
               },
             },
           },
         },
-        nutritionist: nutritionist
-          ? { connect: { id: nutritionist.id } }
-          : undefined,
-        heightCm: data.heightCm,
-        initialWeightKg: data.initialWeightKg,
-        targetWeightKg: data.targetWeightKg,
-        allergies: data.allergies,
+        ...(nutritionist && {
+          nutritionist: { connect: { id: nutritionist.id } },
+        }),
+        ...(data.heightCm && { heightCm: data.heightCm }),
+        ...(data.initialWeightKg && { initialWeightKg: data.initialWeightKg }),
+        ...(data.targetWeightKg && { targetWeightKg: data.targetWeightKg }),
+        ...(data.allergies && { allergies: data.allergies }),
         dietaryRestrictions: data.dietaryRestrictions ?? [],
-        medicalConditions: data.medicalConditions,
-        currentMedications: data.currentMedications,
-        medicalNotes: data.medicalNotes,
+        ...(data.medicalConditions && { medicalConditions: data.medicalConditions }),
+        ...(data.currentMedications && { currentMedications: data.currentMedications }),
+        ...(data.medicalNotes && { medicalNotes: data.medicalNotes }),
         createdById: requestingUser.dbId,
       },
       include: {
@@ -112,24 +108,21 @@ export class PatientsService {
       where: { id, deletedAt: null },
     })
     if (!patient) throw new NotFoundException('Paciente no encontrado')
-
     await this.verifyAccess(patient, requestingUser)
 
     return this.prisma.patient.update({
       where: { id },
       data: {
-        heightCm: data.heightCm,
-        targetWeightKg: data.targetWeightKg,
-        allergies: data.allergies,
-        dietaryRestrictions: data.dietaryRestrictions,
-        medicalConditions: data.medicalConditions,
-        currentMedications: data.currentMedications,
-        medicalNotes: data.medicalNotes,
+        ...(data.heightCm && { heightCm: data.heightCm }),
+        ...(data.targetWeightKg && { targetWeightKg: data.targetWeightKg }),
+        ...(data.allergies && { allergies: data.allergies }),
+        ...(data.dietaryRestrictions && { dietaryRestrictions: data.dietaryRestrictions }),
+        ...(data.medicalConditions && { medicalConditions: data.medicalConditions }),
+        ...(data.currentMedications && { currentMedications: data.currentMedications }),
+        ...(data.medicalNotes && { medicalNotes: data.medicalNotes }),
         updatedById: requestingUser.dbId,
       },
-      include: {
-        user: { include: { profile: true } },
-      },
+      include: { user: { include: { profile: true } } },
     })
   }
 
@@ -137,7 +130,6 @@ export class PatientsService {
     if (requestingUser.role !== 'admin') {
       throw new ForbiddenException('Solo los administradores pueden eliminar pacientes')
     }
-
     return this.prisma.patient.update({
       where: { id },
       data: { deletedAt: new Date(), updatedById: requestingUser.dbId },

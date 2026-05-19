@@ -28,7 +28,7 @@ export class UsersService {
     data: {
       fullName?: string
       phone?: string
-      birthDate?: Date
+      birthDate?: string
       gender?: string
     },
   ) {
@@ -37,10 +37,10 @@ export class UsersService {
     return this.prisma.profile.update({
       where: { userId: user.id },
       data: {
-        fullName: data.fullName,
-        phone: data.phone,
-        birthDate: data.birthDate,
-        gender: data.gender as any,
+        ...(data.fullName !== undefined && { fullName: data.fullName }),
+        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.birthDate !== undefined && { birthDate: new Date(data.birthDate) }),
+        ...(data.gender !== undefined && { gender: data.gender as any }),
         updatedById: user.id,
       },
     })
