@@ -43,7 +43,13 @@ export class WebhooksController {
       const email = data.email_addresses?.[0]?.email_address
       const firstName = data.first_name ?? ''
       const lastName = data.last_name ?? ''
-      const fullName = `${firstName} ${lastName}`.trim() || email
+      const fullName = `${firstName} ${lastName}`.trim() || email || 'Usuario'
+
+      // Si no hay email (test de Clerk), ignorar
+      if (!email) {
+        console.warn('Webhook test ignorado — sin email')
+        return { ok: true }
+      }
 
       await this.prisma.user.upsert({
         where: { clerkId: data.id },
@@ -57,9 +63,11 @@ export class WebhooksController {
           },
         },
         update: {
-          email,
           profile: {
-            update: { fullName },
+            upsert: {
+              create: { fullName },
+              update: { fullName },
+            },
           },
         },
       })
