@@ -1,18 +1,9 @@
-import { Module } from '@nestjs/common'
-import { JwtModule } from '@nestjs/jwt'
-import { PassportModule } from '@nestjs/passport'
-import { UsersModule } from '../users/users.module'
-import { JwtStrategy } from './strategies/jwt.strategy'
-import { ClerkWebhookController } from './webhooks/clerk-webhook.controller'
+import { Module, Global } from '@nestjs/common'
+import { ClerkAuthGuard } from './clerk.guard'
 
+@Global()
 @Module({
-  imports: [
-    PassportModule,
-    JwtModule.register({}),
-    UsersModule,
-  ],
-  controllers: [ClerkWebhookController],
-  providers: [JwtStrategy],
-  exports: [JwtStrategy],
+  providers: [ClerkAuthGuard],
+  exports: [ClerkAuthGuard],
 })
 export class AuthModule {}
