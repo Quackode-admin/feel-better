@@ -3,22 +3,23 @@ import {
   Post,
   Headers,
   Body,
-  RawBodyRequest,
   Req,
   HttpCode,
   BadRequestException,
 } from '@nestjs/common'
 import { Webhook } from 'svix'
+import { PrismaService } from '../shared/prisma.service'
 
 @Controller('webhooks')
 export class WebhooksController {
+  constructor(private readonly prisma: PrismaService) {}
+
   @Post('clerk')
   @HttpCode(200)
   async handleClerkWebhook(
     @Headers('svix-id') svixId: string,
     @Headers('svix-timestamp') svixTimestamp: string,
     @Headers('svix-signature') svixSignature: string,
-    @Req() req: RawBodyRequest<Request>,
     @Body() body: any,
   ) {
     const webhookSecret = process.env['CLERK_WEBHOOK_SECRET']
@@ -40,16 +41,42 @@ export class WebhooksController {
     const { type, data } = event
 
     if (type === 'user.created') {
-      console.warn('Nuevo usuario registrado:', data.id, data.email_addresses?.[0]?.email_address)
-      // TODO: crear usuario en PostgreSQL
-    }
+      const email = data.email_addresses?.[0]?.email_address
+      const firstName = data.first_name ?? ''
+      const lastName = data.last_name ?? ''
 
-    if (type === 'user.updated') {
-      console.warn('Usuario actualizado:', data.id)
+      await this.prisma.user.upsert({
+        where: { email },
+        create: {
+          id: data.id,
+          email,
+          passwordHash: '',
+          role: 'patient',
+          isActive: true,
+          profile: {
+            create: {
+              fullName: `${firstName} ${lastName}`.trim() || email,
+            },
+          },
+        },
+        update: {
+          profile: {
+            update: {
+              fullName: `${firstName} ${lastName}`.trim() || email,
+            },
+          },
+        },
+      })
+
+      console.warn('Usuario creado en DB:', email)
     }
 
     if (type === 'user.deleted') {
-      console.warn('Usuario eliminado:', data.id)
+      await this.prisma.user.updateMany({
+        where: { id: data.id },
+        data: { deletedAt: new Date(), isActive: false },
+      })
+      console.warn('Usuario desactivado en DB:', data.id)
     }
 
     return { ok: true }
