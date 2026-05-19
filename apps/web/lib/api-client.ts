@@ -1,4 +1,4 @@
-export const API_URL = 'https://stellar-alignment-development.up.railway.app'
+import { API_URL } from './config'
 
 export async function apiRequest<T>(
   path: string,

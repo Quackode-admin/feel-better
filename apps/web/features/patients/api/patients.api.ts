@@ -1,4 +1,4 @@
-const API_URL = 'https://stellar-alignment-development.up.railway.app'
+import { API_URL } from '@/lib/config'
 
 export async function getPatientsApi(token: string) {
   const res = await fetch(`${API_URL}/api/v1/patients`, {
