@@ -21,8 +21,8 @@ importers:
   apps/web:
     dependencies:
       '@clerk/nextjs':
-        specifier: ^7.3.4
-        version: 7.3.4(next@14.2.35(@babel/core@7.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^5.7.2
+        version: 5.7.2(next@14.2.35(@babel/core@7.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.75.0(react@18.3.1))
@@ -518,9 +518,21 @@ packages:
   '@braintree/sanitize-url@6.0.4':
     resolution: {integrity: sha512-s3jaWicZd0pkP0jf5ysyHUI/RE7MHos6qlToFcGWXVp+ykHOy77OUMrfbgJ9it2C5bow7OIQwYYaHjk9XlBQ2A==}
 
+  '@clerk/backend@1.13.9':
+    resolution: {integrity: sha512-WW5IyCsaKHld1lNKQ+XSifUJ75CJ2EFJMPcx+R04icexE90EQzktwT5jeHr3brN7YVR9+PJREzlePrt7eIF/uw==}
+    engines: {node: '>=18.17.0'}
+
   '@clerk/backend@3.4.8':
     resolution: {integrity: sha512-Ce4a80q0UqPwXj/ULU6DcLeAhojm5aY9WOL53JPR8w6vDizL6RAM0nyV/JYtpgQP5V3rNOs00WxRMJO0UuvZ0Q==}
     engines: {node: '>=20.9.0'}
+
+  '@clerk/clerk-react@5.11.0':
+    resolution: {integrity: sha512-JPvDxSPMV1Rrnh5k1ULxeemvUW+F5YdVUQAUhPPl/iZ6MHO6vXr5jn66xe0hM+wrw/snGlsrD9ePyy6tK8EDKw==}
+    engines: {node: '>=18.17.0'}
+    deprecated: 'This package is no longer supported. Please use @clerk/react instead. See the upgrade guide for more info: https://clerk.com/docs/guides/development/upgrading/upgrade-guides/core-3'
+    peerDependencies:
+      react: '>=18 || >=19.0.0-beta'
+      react-dom: '>=18 || >=19.0.0-beta'
 
   '@clerk/express@2.1.16':
     resolution: {integrity: sha512-3mTjBXo26DDs9f2eStmY/unv8NOUjBNHODThI1LBbS2DVGSN+g9W+Rr27dR960DB+m6PqBPksBthJDT3HkasxA==}
@@ -528,20 +540,25 @@ packages:
     peerDependencies:
       express: ^4.17.0 || ^5.0.0
 
-  '@clerk/nextjs@7.3.4':
-    resolution: {integrity: sha512-caso83n7JADx+J4c7l0v3IytdHIyiNVxOq0o06SQGsd+azcMI0IkJSctOwryGf0F5R2vmKlq9TPmUenVWSRUag==}
-    engines: {node: '>=20.9.0'}
+  '@clerk/nextjs@5.7.2':
+    resolution: {integrity: sha512-G2ilYV0RyOrwc6gI6qmKAsML+7YLiVX/VFlkuvh3vk+qJ6ka8RDaoaILcmREEs4AOaQXBHYQCfiCrYMUeEUJFg==}
+    engines: {node: '>=18.17.0'}
     peerDependencies:
-      next: ^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.9 || ^15.6.0-0 || ^16.0.10 || ^16.1.0-0
-      react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-      react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+      next: ^13.5.4 || ^14.0.3 || >=15.0.0-rc
+      react: '>=18 || >=19.0.0-beta'
+      react-dom: '>=18 || >=19.0.0-beta'
 
-  '@clerk/react@6.6.3':
-    resolution: {integrity: sha512-u4dU7rRjOx5/IcZAjIvPHLPDhaut9Oa9wTOvIJLJ54z1kNR5m+Qnmap++dD9mH8orIPUmW7VlJrF5wVVc2FHdA==}
-    engines: {node: '>=20.9.0'}
+  '@clerk/shared@2.9.0':
+    resolution: {integrity: sha512-DAqxJbmQ3QnQXZepG2InLC7Hdq+4T9/+A/kwtMQtAyQcsZoDwZ1TqVJkrqZ55lJIAkR97HEn3/g+g1ySspdEfA==}
+    engines: {node: '>=18.17.0'}
     peerDependencies:
-      react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-      react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+      react: '>=18 || >=19.0.0-beta'
+      react-dom: '>=18 || >=19.0.0-beta'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   '@clerk/shared@4.11.0':
     resolution: {integrity: sha512-QnduIRldVe+16w+pU24si0TZjbToGCIJI8Hsd0jGNMaloLsjQGA6XLO455JGIN8FFzQYCPS0x+bugjlvM8PGYQ==}
@@ -554,6 +571,11 @@ packages:
         optional: true
       react-dom:
         optional: true
+
+  '@clerk/types@4.25.0':
+    resolution: {integrity: sha512-p2IyJ0q5WF1e976L1pS1J6Mb5ducfkUC31DR1EvMjPwJkrlWJdAMCPc+zqRRAePVy/JBVK2gEKbUVtJ6/jrpag==}
+    engines: {node: '>=18.17.0'}
+    deprecated: 'This package is no longer supported. Please import types from @clerk/shared/types instead. See the upgrade guide for more info: https://clerk.com/docs/guides/development/upgrading/upgrade-guides/core-3'
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -2370,6 +2392,10 @@ packages:
     resolution: {integrity: sha512-D76uU73ulSXrD1UXF4KE2TMxVVwhsnCgfAyTg9k8P6KGZjlXKrOLe4dJQKI3Bxi5wjesZoFXJWElNWBjPZMbhg==}
     engines: {node: '>=6.6.0'}
 
+  cookie@0.7.0:
+    resolution: {integrity: sha512-qCf+V4dtlNhSRXGAZatc1TasyFO6GjohcOul807YOb5ik3+kQSnb4d7iajeCL8QHaJ4uZEjCgiCJerKXwdRVlQ==}
+    engines: {node: '>= 0.6'}
+
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
@@ -2407,10 +2433,16 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
+  crypto-js@4.2.0:
+    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+
   cssesc@3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
     engines: {node: '>=4'}
     hasBin: true
+
+  csstype@3.1.1:
+    resolution: {integrity: sha512-DJR/VvkAvSZW9bTouZue2sSxDwdTN92uHjqeKVm+0dAqdfNykRzQ95tay8aXMBAAPpUiq4Qcug2L7neoRh2Egw==}
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
@@ -2504,6 +2536,9 @@ packages:
 
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
+
+  dot-case@3.0.4:
+    resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
 
   dotenv-expand@10.0.0:
     resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
@@ -3305,6 +3340,9 @@ packages:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
 
+  lower-case@2.0.2:
+    resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
+
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
@@ -3329,6 +3367,10 @@ packages:
   magic-string@0.30.8:
     resolution: {integrity: sha512-ISQTe55T2ao7XtlAStud6qwYPZjE4GK1S/BeVPus4jrq6JuOnQ00YKQC581RWhR122W7msZV263KzVeLoqidyQ==}
     engines: {node: '>=12'}
+
+  map-obj@4.3.0:
+    resolution: {integrity: sha512-hdN1wVrZbb29eBGiGjJbeP8JbKjq1urkHJ/LIP/NY48MZ1QVXUsQBV1G1zvYFHn1XE06cwjBsOI2K3Ulnj1YXQ==}
+    engines: {node: '>=8'}
 
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
@@ -3621,6 +3663,9 @@ packages:
         optional: true
       sass:
         optional: true
+
+  no-case@3.0.4:
+    resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
 
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
@@ -4226,6 +4271,13 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
+  snake-case@3.0.4:
+    resolution: {integrity: sha512-LAOh4z89bGQvl9pFfNF8V146i7o7/CqFPbqzYgP+yYzDIDeS9HaNFtXABamRW+AQzEVODcvE79ljJ+8a9YSdMg==}
+
+  snakecase-keys@5.4.4:
+    resolution: {integrity: sha512-YTywJG93yxwHLgrYLZjlC75moVEX04LZM4FHfihjHe1FCXm+QaLOFfSf535aXOAd0ArVQMWUAe8ZPm4VtWyXaA==}
+    engines: {node: '>=12'}
+
   sonner@2.0.7:
     resolution: {integrity: sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==}
     peerDependencies:
@@ -4392,6 +4444,11 @@ packages:
   swagger-ui-dist@5.17.14:
     resolution: {integrity: sha512-CVbSfaLpstV65OnSjbXfVd6Sta3q3F7Cj/yYuvHMp1P90LztOLs6PfUnKEVAeiIVQt9u2SaPwv0LiH/OyMjHRw==}
 
+  swr@2.4.1:
+    resolution: {integrity: sha512-2CC6CiKQtEwaEeNiqWTAw9PGykW8SR5zZX8MZk6TeAvEAnVS7Visz8WzphqgtQ8v2xz/4Q5K+j+SeMaKXeeQIA==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   symbol-observable@4.0.0:
     resolution: {integrity: sha512-b19dMThMV4HVFynSAM1++gBHAbk2Tc/osgLIBZMKsyqh34jb2e8Os7T6ZW/Bt3pJFdBTd2JwAnAAEQV7rSNvcQ==}
     engines: {node: '>=0.10'}
@@ -4549,6 +4606,9 @@ packages:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
 
+  tslib@2.4.1:
+    resolution: {integrity: sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -4562,6 +4622,10 @@ packages:
   type-fest@0.21.3:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
+
+  type-fest@2.19.0:
+    resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
+    engines: {node: '>=12.20'}
 
   type-fest@5.6.0:
     resolution: {integrity: sha512-8ZiHFm91orbSAe2PSAiSVBVko18pbhbiB3U9GglSzF/zCGkR+rxpHx6sEMCUm4kxY4LjDIUGgCfUMtwfZfjfUA==}
@@ -5391,6 +5455,17 @@ snapshots:
 
   '@braintree/sanitize-url@6.0.4': {}
 
+  '@clerk/backend@1.13.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@clerk/shared': 2.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/types': 4.25.0
+      cookie: 0.7.0
+      snakecase-keys: 5.4.4
+      tslib: 2.4.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
   '@clerk/backend@3.4.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@clerk/shared': 4.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -5399,6 +5474,14 @@ snapshots:
     transitivePeerDependencies:
       - react
       - react-dom
+
+  '@clerk/clerk-react@5.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@clerk/shared': 2.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/types': 4.25.0
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      tslib: 2.4.1
 
   '@clerk/express@2.1.16(express@5.2.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -5410,23 +5493,29 @@ snapshots:
       - react
       - react-dom
 
-  '@clerk/nextjs@7.3.4(next@14.2.35(@babel/core@7.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@clerk/nextjs@5.7.2(next@14.2.35(@babel/core@7.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@clerk/backend': 3.4.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/react': 6.6.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/shared': 4.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/backend': 1.13.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/clerk-react': 5.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/shared': 2.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/types': 4.25.0
+      crypto-js: 4.2.0
       next: 14.2.35(@babel/core@7.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       server-only: 0.0.1
-      tslib: 2.8.1
+      tslib: 2.4.1
 
-  '@clerk/react@6.6.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@clerk/shared@2.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@clerk/shared': 4.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@clerk/types': 4.25.0
+      glob-to-regexp: 0.4.1
+      js-cookie: 3.0.5
+      std-env: 3.10.0
+      swr: 2.4.1(react@18.3.1)
+    optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      tslib: 2.8.1
 
   '@clerk/shared@4.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -5438,6 +5527,10 @@ snapshots:
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  '@clerk/types@4.25.0':
+    dependencies:
+      csstype: 3.1.1
 
   '@colors/colors@1.5.0':
     optional: true
@@ -7389,6 +7482,8 @@ snapshots:
 
   cookie-signature@1.2.2: {}
 
+  cookie@0.7.0: {}
+
   cookie@0.7.2: {}
 
   cookie@1.1.1: {}
@@ -7424,7 +7519,11 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
+  crypto-js@4.2.0: {}
+
   cssesc@3.0.0: {}
+
+  csstype@3.1.1: {}
 
   csstype@3.2.3: {}
 
@@ -7486,6 +7585,11 @@ snapshots:
   diff@8.0.4: {}
 
   dlv@1.1.3: {}
+
+  dot-case@3.0.4:
+    dependencies:
+      no-case: 3.0.4
+      tslib: 2.8.1
 
   dotenv-expand@10.0.0: {}
 
@@ -8350,6 +8454,10 @@ snapshots:
     dependencies:
       js-tokens: 4.0.0
 
+  lower-case@2.0.2:
+    dependencies:
+      tslib: 2.8.1
+
   lru-cache@10.4.3: {}
 
   lru-cache@11.3.6: {}
@@ -8374,6 +8482,8 @@ snapshots:
   magic-string@0.30.8:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  map-obj@4.3.0: {}
 
   markdown-table@3.0.4: {}
 
@@ -8869,6 +8979,11 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+
+  no-case@3.0.4:
+    dependencies:
+      lower-case: 2.0.2
+      tslib: 2.8.1
 
   node-abort-controller@3.1.1: {}
 
@@ -9629,6 +9744,17 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
+  snake-case@3.0.4:
+    dependencies:
+      dot-case: 3.0.4
+      tslib: 2.8.1
+
+  snakecase-keys@5.4.4:
+    dependencies:
+      map-obj: 4.3.0
+      snake-case: 3.0.4
+      type-fest: 2.19.0
+
   sonner@2.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
@@ -9814,6 +9940,12 @@ snapshots:
 
   swagger-ui-dist@5.17.14: {}
 
+  swr@2.4.1(react@18.3.1):
+    dependencies:
+      dequal: 2.0.3
+      react: 18.3.1
+      use-sync-external-store: 1.6.0(react@18.3.1)
+
   symbol-observable@4.0.0: {}
 
   tabbable@6.4.0: {}
@@ -9948,6 +10080,8 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
+  tslib@2.4.1: {}
+
   tslib@2.8.1: {}
 
   turbo@2.9.12:
@@ -9962,6 +10096,8 @@ snapshots:
   tw-animate-css@1.4.0: {}
 
   type-fest@0.21.3: {}
+
+  type-fest@2.19.0: {}
 
   type-fest@5.6.0:
     dependencies:
