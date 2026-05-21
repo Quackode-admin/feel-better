@@ -14,14 +14,14 @@ export default async function DashboardLayout({
   const user = await currentUser()
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <SidebarNav />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--cream-50)' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--cream-50)', overflow: 'hidden' }}>
         <Header
           firstName={user?.firstName ?? ''}
           lastName={user?.lastName ?? ''}
         />
-        <main style={{ flex: 1, padding: 24 }}>
+        <main style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
           {children}
         </main>
       </div>

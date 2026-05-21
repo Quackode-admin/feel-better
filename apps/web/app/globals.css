@@ -181,3 +181,10 @@ input[data-fb-input]:focus {
 .fb-press:active {
   transform: scale(0.97);
 }
+
+/* ── Dashboard pages need scroll ─────────────────────────────────────────── */
+main > *:not([data-stepper]) {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px;
+}

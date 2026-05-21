@@ -59,11 +59,12 @@ export function PatientStepper() {
 
   return (
     <div style={{
+      position: 'absolute',
+      inset: 0,
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
-      minHeight: 'calc(100vh - 64px)',
       backgroundColor: 'var(--cream-50)',
+      overflow: 'hidden',
     }}>
 
       {/* ── Top bar ────────────────────────────────────────── */}
@@ -91,7 +92,7 @@ export function PatientStepper() {
       </div>
 
       {/* ── Stepper progress ───────────────────────────────── */}
-      <div style={{ flexShrink: 0, padding: '16px 24px' }}>
+      <div style={{ flexShrink: 0, padding: '14px 24px' }}>
         <StepperProgress current={step} />
       </div>
 
@@ -108,12 +109,13 @@ export function PatientStepper() {
         </div>
       </div>
 
-      {/* ── Footer ─────────────────────────────────────────── */}
+      {/* ── Footer — mismo fondo que el DS ─────────────────── */}
       <div style={{
         flexShrink: 0,
         height: 68,
         padding: '0 24px',
-        backgroundColor: 'var(--ink-900)',
+        backgroundColor: 'var(--white)',
+        borderTop: '1px solid var(--green-100)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -127,14 +129,14 @@ export function PatientStepper() {
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '9px 20px',
               borderRadius: 'var(--r-sm)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              backgroundColor: 'transparent',
-              color: 'white',
+              border: '1px solid var(--green-200)',
+              backgroundColor: 'var(--white)',
+              color: 'var(--ink-700)',
               fontSize: '14px', fontWeight: 600,
               cursor: 'pointer',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-50)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--white)')}
           >
             <ArrowLeft size={16} strokeWidth={2.25} />
             Anterior
@@ -151,15 +153,15 @@ export function PatientStepper() {
                 height: 8,
                 borderRadius: 9999,
                 backgroundColor: s === step
-                  ? 'var(--green-400)'
+                  ? 'var(--green-950)'
                   : s < step
-                  ? 'var(--green-700)'
-                  : 'rgba(255,255,255,0.15)',
+                  ? 'var(--green-400)'
+                  : 'var(--green-100)',
                 transition: 'all 150ms cubic-bezier(0.2, 0, 0, 1)',
               }}
             />
           ))}
-          <span style={{ marginLeft: 10, fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>
+          <span style={{ marginLeft: 10, fontSize: '13px', fontWeight: 500, color: 'var(--ink-400)' }}>
             Paso {step} de {TOTAL}
           </span>
         </div>
