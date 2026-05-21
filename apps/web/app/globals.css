@@ -114,3 +114,34 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* ── Dialog override ─────────────────────────────────────────────────────── */
+[role="dialog"] {
+  background-color: white !important;
+}
+
+/* ── Inputs con borde visible sobre fondo blanco ─────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+  background-color: white;
+  border: 1px solid var(--green-200) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--green-700) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-400);
+}
