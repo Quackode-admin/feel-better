@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { StepperProgress } from './StepperProgress'
-import { Step1Personal }    from './Step1Personal'
+import { Step1Personal }     from './Step1Personal'
 import { Step2Antecedentes } from './Step2Antecedentes'
-import { Step3Lifestyle }   from './Step3Lifestyle'
-import { Step4Measures }    from './Step4Measures'
-import { Step5MealPlan }    from './Step5MealPlan'
-import { Step6Summary }     from './Step6Summary'
+import { Step3Lifestyle }    from './Step3Lifestyle'
+import { Step4Measures }     from './Step4Measures'
+import { Step5MealPlan }     from './Step5MealPlan'
+import { Step6Summary }      from './Step6Summary'
 import { INITIAL_DATA, StepperData } from './types'
 import { useCreatePatient } from '../../hooks/usePatients'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
@@ -16,8 +16,8 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 const TOTAL = 6
 
 export function PatientStepper() {
-  const [step, setStep]   = useState(1)
-  const [data, setData]   = useState<StepperData>(INITIAL_DATA)
+  const [step, setStep] = useState(1)
+  const [data, setData] = useState<StepperData>(INITIAL_DATA)
   const { mutate, isPending } = useCreatePatient()
   const router = useRouter()
 
@@ -31,7 +31,6 @@ export function PatientStepper() {
   function handleFinish() {
     const fullName = [data.firstName, data.middleName, data.lastName, data.secondLastName]
       .filter(Boolean).join(' ')
-
     mutate(
       {
         fullName,
@@ -59,83 +58,119 @@ export function PatientStepper() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: 'var(--ink-900)',
+    <div style={{ backgroundColor: 'var(--ink-900)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+
+      {/* ── Top bar ───────────────────────────────────────────────── */}
+      <div style={{
+        padding: '0 24px',
+        height: 56,
         display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Top bar */}
-      <div style={{ padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0,
+      }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>
           Nueva consulta
         </h1>
         <button
           onClick={() => router.back()}
-          style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           Cancelar
         </button>
       </div>
 
-      {/* Progress */}
-      <div style={{ padding: '0 24px 16px' }}>
+      {/* ── Stepper progress ─────────────────────────────────────── */}
+      <div style={{ padding: '0 24px 16px', flexShrink: 0 }}>
         <StepperProgress current={step} />
       </div>
 
-      {/* Content */}
-      <div style={{ flex: 1, padding: '0 24px', overflowY: 'auto' }}>
-        <div
-          style={{
-            backgroundColor: 'var(--white)',
-            borderRadius: 'var(--r-md)',
-            padding: '24px',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
+      {/* ── Scrollable content ────────────────────────────────────── */}
+      <div style={{ flex: 1, padding: '0 24px', overflowY: 'auto', paddingBottom: 100 }}>
+        <div style={{
+          backgroundColor: 'var(--white)',
+          borderRadius: 'var(--r-md)',
+          padding: '28px',
+          boxShadow: 'var(--shadow-card)',
+        }}>
           {steps[step]}
         </div>
       </div>
 
-      {/* Footer */}
-      <div
-        style={{
-          padding: '16px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+      {/* ── Fixed footer ──────────────────────────────────────────── */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 68,
+        backgroundColor: 'rgba(25, 28, 24, 0.95)',
+        backdropFilter: 'blur(12px)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px',
+        zIndex: 50,
+      }}>
+
+        {/* Anterior */}
         {step > 1 ? (
           <button
             onClick={prev}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 20px', borderRadius: 'var(--r-sm)',
+              padding: '10px 20px',
+              borderRadius: 'var(--r-sm)',
               border: '1px solid rgba(255,255,255,0.2)',
-              backgroundColor: 'transparent', color: 'white',
-              fontSize: '14px', fontWeight: 500, cursor: 'pointer',
+              backgroundColor: 'transparent',
+              color: 'white',
+              fontSize: '14px', fontWeight: 600,
+              cursor: 'pointer',
+              letterSpacing: '0.01em',
             }}
           >
             <ArrowLeft size={16} strokeWidth={2.25} />
             Anterior
           </button>
-        ) : <div />}
+        ) : <div style={{ width: 120 }} />}
 
-        <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-          Paso {step} de {TOTAL}
-        </span>
+        {/* Indicador de paso */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {Array.from({ length: TOTAL }, (_, i) => i + 1).map((s) => (
+            <div
+              key={s}
+              style={{
+                width: s === step ? 24 : 8,
+                height: 8,
+                borderRadius: 9999,
+                backgroundColor: s === step
+                  ? 'var(--green-400)'
+                  : s < step
+                  ? 'var(--green-700)'
+                  : 'rgba(255,255,255,0.15)',
+                transition: 'all 150ms cubic-bezier(0.2, 0, 0, 1)',
+              }}
+            />
+          ))}
+          <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: 8, fontWeight: 500 }}>
+            Paso {step} de {TOTAL}
+          </span>
+        </div>
 
+        {/* Continuar / Finalizar */}
         {step < TOTAL ? (
           <button
             onClick={next}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 24px', borderRadius: 'var(--r-sm)',
-              border: 'none', backgroundColor: 'var(--green-950)', color: 'white',
-              fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+              padding: '10px 24px',
+              borderRadius: 'var(--r-sm)',
+              border: 'none',
+              backgroundColor: 'var(--green-950)',
+              color: 'white',
+              fontSize: '14px', fontWeight: 700,
+              cursor: 'pointer',
               letterSpacing: '0.02em',
             }}
           >
@@ -148,9 +183,13 @@ export function PatientStepper() {
             disabled={isPending}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 24px', borderRadius: 'var(--r-sm)',
-              border: 'none', backgroundColor: 'var(--green-700)', color: 'white',
-              fontSize: '14px', fontWeight: 700, cursor: isPending ? 'not-allowed' : 'pointer',
+              padding: '10px 24px',
+              borderRadius: 'var(--r-sm)',
+              border: 'none',
+              backgroundColor: 'var(--green-700)',
+              color: 'white',
+              fontSize: '14px', fontWeight: 700,
+              cursor: isPending ? 'not-allowed' : 'pointer',
               opacity: isPending ? 0.7 : 1,
             }}
           >
