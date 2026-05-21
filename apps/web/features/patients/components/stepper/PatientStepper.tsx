@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { StepperProgress } from './StepperProgress'
+import { StepperProgress }   from './StepperProgress'
 import { Step1Personal }     from './Step1Personal'
 import { Step2Antecedentes } from './Step2Antecedentes'
 import { Step3Lifestyle }    from './Step3Lifestyle'
@@ -10,7 +10,7 @@ import { Step4Measures }     from './Step4Measures'
 import { Step5MealPlan }     from './Step5MealPlan'
 import { Step6Summary }      from './Step6Summary'
 import { INITIAL_DATA, StepperData } from './types'
-import { useCreatePatient } from '../../hooks/usePatients'
+import { useCreatePatient }  from '../../hooks/usePatients'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 
 const TOTAL = 6
@@ -58,35 +58,45 @@ export function PatientStepper() {
   }
 
   return (
-    <div style={{ backgroundColor: 'var(--ink-900)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-
-      {/* ── Top bar ───────────────────────────────────────────────── */}
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'var(--ink-900)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        zIndex: 10,
+      }}
+    >
+      {/* ── Top bar ────────────────────────────────────────────── */}
       <div style={{
-        padding: '0 24px',
+        flexShrink: 0,
         height: 56,
+        padding: '0 24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        flexShrink: 0,
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
         <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>
           Nueva consulta
         </h1>
         <button
           onClick={() => router.back()}
-          style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           Cancelar
         </button>
       </div>
 
-      {/* ── Stepper progress ─────────────────────────────────────── */}
-      <div style={{ padding: '0 24px 16px', flexShrink: 0 }}>
+      {/* ── Stepper progress ───────────────────────────────────── */}
+      <div style={{ flexShrink: 0, padding: '14px 24px' }}>
         <StepperProgress current={step} />
       </div>
 
-      {/* ── Scrollable content ────────────────────────────────────── */}
-      <div style={{ flex: 1, padding: '0 24px', overflowY: 'auto', paddingBottom: 100 }}>
+      {/* ── Scrollable content ─────────────────────────────────── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
         <div style={{
           backgroundColor: 'var(--white)',
           borderRadius: 'var(--r-md)',
@@ -97,21 +107,17 @@ export function PatientStepper() {
         </div>
       </div>
 
-      {/* ── Fixed footer ──────────────────────────────────────────── */}
+      {/* ── Footer — contained inside the stepper ──────────────── */}
       <div style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        flexShrink: 0,
         height: 68,
-        backgroundColor: 'rgba(25, 28, 24, 0.95)',
+        padding: '0 24px',
+        backgroundColor: 'rgba(25, 28, 24, 0.96)',
         backdropFilter: 'blur(12px)',
         borderTop: '1px solid rgba(255,255,255,0.08)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 24px',
-        zIndex: 50,
       }}>
 
         {/* Anterior */}
@@ -120,28 +126,29 @@ export function PatientStepper() {
             onClick={prev}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 20px',
+              padding: '9px 20px',
               borderRadius: 'var(--r-sm)',
               border: '1px solid rgba(255,255,255,0.2)',
               backgroundColor: 'transparent',
               color: 'white',
               fontSize: '14px', fontWeight: 600,
               cursor: 'pointer',
-              letterSpacing: '0.01em',
             }}
           >
             <ArrowLeft size={16} strokeWidth={2.25} />
             Anterior
           </button>
-        ) : <div style={{ width: 120 }} />}
+        ) : (
+          <div style={{ width: 110 }} />
+        )}
 
-        {/* Indicador de paso */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Dots + paso */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {Array.from({ length: TOTAL }, (_, i) => i + 1).map((s) => (
             <div
               key={s}
               style={{
-                width: s === step ? 24 : 8,
+                width:  s === step ? 22 : 8,
                 height: 8,
                 borderRadius: 9999,
                 backgroundColor: s === step
@@ -153,7 +160,12 @@ export function PatientStepper() {
               }}
             />
           ))}
-          <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginLeft: 8, fontWeight: 500 }}>
+          <span style={{
+            marginLeft: 10,
+            fontSize: '13px',
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.35)',
+          }}>
             Paso {step} de {TOTAL}
           </span>
         </div>
@@ -164,7 +176,7 @@ export function PatientStepper() {
             onClick={next}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 24px',
+              padding: '9px 24px',
               borderRadius: 'var(--r-sm)',
               border: 'none',
               backgroundColor: 'var(--green-950)',
@@ -183,7 +195,7 @@ export function PatientStepper() {
             disabled={isPending}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 24px',
+              padding: '9px 24px',
               borderRadius: 'var(--r-sm)',
               border: 'none',
               backgroundColor: 'var(--green-700)',
