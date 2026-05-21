@@ -58,63 +58,62 @@ export function PatientStepper() {
   }
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundColor: 'var(--ink-900)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        zIndex: 10,
-      }}
-    >
-      {/* ── Top bar ────────────────────────────────────────────── */}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      minHeight: 'calc(100vh - 64px)',
+      backgroundColor: 'var(--cream-50)',
+    }}>
+
+      {/* ── Top bar ────────────────────────────────────────── */}
       <div style={{
         flexShrink: 0,
         height: 56,
         padding: '0 24px',
+        backgroundColor: 'var(--white)',
+        borderBottom: '1px solid var(--green-100)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
-        <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--green-950)', letterSpacing: '-0.02em' }}>
           Nueva consulta
         </h1>
         <button
           onClick={() => router.back()}
-          style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink-400)', background: 'none', border: 'none', cursor: 'pointer' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-900)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-400)')}
         >
           Cancelar
         </button>
       </div>
 
-      {/* ── Stepper progress ───────────────────────────────────── */}
-      <div style={{ flexShrink: 0, padding: '14px 24px' }}>
+      {/* ── Stepper progress ───────────────────────────────── */}
+      <div style={{ flexShrink: 0, padding: '16px 24px' }}>
         <StepperProgress current={step} />
       </div>
 
-      {/* ── Scrollable content ─────────────────────────────────── */}
+      {/* ── Scrollable content ─────────────────────────────── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
         <div style={{
           backgroundColor: 'var(--white)',
           borderRadius: 'var(--r-md)',
           padding: '28px',
+          border: '1px solid var(--green-100)',
           boxShadow: 'var(--shadow-card)',
         }}>
           {steps[step]}
         </div>
       </div>
 
-      {/* ── Footer — contained inside the stepper ──────────────── */}
+      {/* ── Footer ─────────────────────────────────────────── */}
       <div style={{
         flexShrink: 0,
         height: 68,
         padding: '0 24px',
-        backgroundColor: 'rgba(25, 28, 24, 0.96)',
-        backdropFilter: 'blur(12px)',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
+        backgroundColor: 'var(--ink-900)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -134,13 +133,13 @@ export function PatientStepper() {
               fontSize: '14px', fontWeight: 600,
               cursor: 'pointer',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
           >
             <ArrowLeft size={16} strokeWidth={2.25} />
             Anterior
           </button>
-        ) : (
-          <div style={{ width: 110 }} />
-        )}
+        ) : <div style={{ width: 110 }} />}
 
         {/* Dots + paso */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -160,12 +159,7 @@ export function PatientStepper() {
               }}
             />
           ))}
-          <span style={{
-            marginLeft: 10,
-            fontSize: '13px',
-            fontWeight: 500,
-            color: 'rgba(255,255,255,0.35)',
-          }}>
+          <span style={{ marginLeft: 10, fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>
             Paso {step} de {TOTAL}
           </span>
         </div>
@@ -183,8 +177,9 @@ export function PatientStepper() {
               color: 'white',
               fontSize: '14px', fontWeight: 700,
               cursor: 'pointer',
-              letterSpacing: '0.02em',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-700)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-950)')}
           >
             Continuar
             <ArrowRight size={16} strokeWidth={2.25} />

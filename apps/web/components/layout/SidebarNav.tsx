@@ -3,89 +3,140 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutGrid, Users, Calendar, Salad, TrendingUp } from 'lucide-react'
+import {
+  LayoutGrid,
+  Users,
+  Plus,
+  Calendar,
+  BarChart2,
+  Settings,
+  ChevronLeft,
+} from 'lucide-react'
+import { usePatients } from '@/features/patients/hooks/usePatients'
 
-const navItems = [
-  { href: '/dashboard',    label: 'Inicio',       icon: LayoutGrid },
-  { href: '/patients',     label: 'Pacientes',    icon: Users },
-  { href: '/appointments', label: 'Citas',        icon: Calendar },
-  { href: '/nutrition',    label: 'Nutrición',    icon: Salad },
-  { href: '/tracking',     label: 'Seguimiento',  icon: TrendingUp },
+const PRINCIPAL = [
+  { href: '/dashboard',    label: 'Dashboard',       icon: LayoutGrid },
+  { href: '/patients',     label: 'Pacientes',       icon: Users,     badge: true },
+  { href: '/patients/new', label: 'Nueva consulta',  icon: Plus },
 ]
+
+const HERRAMIENTAS = [
+  { href: '/appointments', label: 'Agenda',          icon: Calendar },
+  { href: '/reports',      label: 'Reportes',        icon: BarChart2 },
+  { href: '/settings',     label: 'Configuración',   icon: Settings },
+]
+
+function NavItem({ href, label, icon: Icon, badge, count, active }: {
+  href: string; label: string; icon: any; badge?: boolean; count?: number; active: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn('flex items-center gap-3 px-3 py-2.5 rounded-fb-sm text-sm transition-colors')}
+      style={
+        active
+          ? { backgroundColor: 'var(--green-700)', color: 'white', fontWeight: 600 }
+          : { color: 'rgba(255,255,255,0.65)', fontWeight: 400 }
+      }
+      onMouseEnter={(e) => { if (!active) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)' }}
+      onMouseLeave={(e) => { if (!active) e.currentTarget.style.backgroundColor = 'transparent' }}
+    >
+      <Icon size={16} strokeWidth={2.25} style={{ flexShrink: 0 }} />
+      <span style={{ flex: 1 }}>{label}</span>
+      {badge && count !== undefined && count > 0 && (
+        <span style={{
+          fontSize: '11px', fontWeight: 700,
+          backgroundColor: 'rgba(255,255,255,0.15)',
+          color: 'white',
+          padding: '2px 7px',
+          borderRadius: 9999,
+          minWidth: 20,
+          textAlign: 'center',
+        }}>
+          {count}
+        </span>
+      )}
+    </Link>
+  )
+}
 
 export function SidebarNav() {
   const pathname = usePathname()
+  const { data: patients } = usePatients()
+  const patientCount = patients?.length ?? 0
 
   return (
-    <aside
-      className="w-64 flex flex-col shrink-0"
-      style={{
-        backgroundColor: 'var(--white)',
-        borderRight: '1px solid var(--green-100)',
-        minHeight: '100vh',
-      }}
-    >
-      {/* Wordmark */}
-      <div
-        className="px-6 flex items-center"
+    <aside style={{
+      width: 200,
+      flexShrink: 0,
+      backgroundColor: 'var(--green-950)',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+
+      {/* Volver al inicio */}
+      <Link
+        href="/dashboard"
         style={{
-          height: '64px',
-          borderBottom: '1px solid var(--green-100)',
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '16px 16px 12px',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: '13px', fontWeight: 500,
+          textDecoration: 'none',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'white')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
       >
-        <span
-          style={{
-            fontFamily: 'Inter, sans-serif',
-            fontWeight: 700,
-            fontSize: '20px',
-            color: 'var(--green-900)',
-            letterSpacing: '-0.05em',
-          }}
-        >
+        <ChevronLeft size={14} strokeWidth={2.25} />
+        Volver al inicio
+      </Link>
+
+      {/* Wordmark + subtítulo */}
+      <div style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <p style={{ fontSize: '16px', fontWeight: 700, color: 'white', letterSpacing: '-0.04em', marginBottom: 2 }}>
           Feel Better
-        </span>
+        </p>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+          Portal nutricionista
+        </p>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-fb-sm text-sm transition-colors fb-press',
-                !isActive && 'hover:bg-fb-green-25',
-              )}
-              style={
-                isActive
-                  ? { backgroundColor: 'var(--green-950)', color: 'var(--white)', fontWeight: 600 }
-                  : { color: 'var(--ink-700)', fontWeight: 400 }
-              }
-            >
-              <Icon
-                size={18}
-                strokeWidth={2.25}
-                style={{ color: isActive ? 'var(--white)' : 'var(--ink-500)', flexShrink: 0 }}
-              />
-              {label}
-            </Link>
-          )
-        })}
+      <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+        {/* PRINCIPAL */}
+        <p style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 6px 4px', marginTop: 4 }}>
+          Principal
+        </p>
+        {PRINCIPAL.map(({ href, label, icon, badge }) => (
+          <NavItem
+            key={href}
+            href={href}
+            label={label}
+            icon={icon}
+            badge={badge}
+            count={badge ? patientCount : undefined}
+            active={pathname === href || (href !== '/dashboard' && href !== '/patients/new' && pathname.startsWith(href) && !pathname.startsWith('/patients/new'))}
+          />
+        ))}
+
+        {/* HERRAMIENTAS */}
+        <p style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 6px 4px' }}>
+          Herramientas
+        </p>
+        {HERRAMIENTAS.map(({ href, label, icon }) => (
+          <NavItem
+            key={href}
+            href={href}
+            label={label}
+            icon={icon}
+            active={pathname === href}
+          />
+        ))}
       </nav>
 
-      {/* Footer */}
-      <div
-        className="px-6 py-4"
-        style={{
-          borderTop: '1px solid var(--green-100)',
-          fontSize: '12px',
-          color: 'var(--ink-400)',
-        }}
-      >
-        Feel Better © 2026
-      </div>
     </aside>
   )
 }
