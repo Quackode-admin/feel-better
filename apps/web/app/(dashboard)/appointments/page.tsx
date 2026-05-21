@@ -43,7 +43,10 @@ export default function AppointmentsPage() {
                 Agendar nueva cita
               </DialogTitle>
             </DialogHeader>
-            <CreateAppointmentForm onSuccess={() => setOpen(false)} />
+            <CreateAppointmentForm
+              onSuccess={() => setOpen(false)}
+              onCancel={() => setOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
