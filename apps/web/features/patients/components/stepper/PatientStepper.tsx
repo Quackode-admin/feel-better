@@ -15,9 +15,28 @@ import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 
 const TOTAL = 6
 
+function validateStep(step: number, data: StepperData): Record<string, string> {
+  const errors: Record<string, string> = {}
+  if (step === 1) {
+    if (!data.firstName.trim()) errors.firstName = 'Este campo es requerido'
+    if (!data.lastName.trim())  errors.lastName  = 'Este campo es requerido'
+    if (!data.email.trim())     errors.email     = 'Este campo es requerido'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = 'Correo electrónico inválido'
+  }
+  if (step === 2) {
+    if (!data.chronicDiseases.trim()) errors.chronicDiseases = 'Este campo es requerido'
+  }
+  if (step === 3) {
+    if (!data.sleepRoutine.trim())     errors.sleepRoutine     = 'Este campo es requerido'
+    if (!data.physicalActivity.trim()) errors.physicalActivity = 'Este campo es requerido'
+  }
+  return errors
+}
+
 export function PatientStepper() {
-  const [step, setStep] = useState(1)
-  const [data, setData] = useState<StepperData>(INITIAL_DATA)
+  const [step, setStep]     = useState(1)
+  const [data, setData]     = useState<StepperData>(INITIAL_DATA)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const { mutate, isPending } = useCreatePatient()
   const router = useRouter()
 
@@ -25,8 +44,20 @@ export function PatientStepper() {
     setData((prev) => ({ ...prev, ...partial }))
   }
 
-  function next() { if (step < TOTAL) setStep((s) => s + 1) }
-  function prev() { if (step > 1)     setStep((s) => s - 1) }
+  function next() {
+    const stepErrors = validateStep(step, data)
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors)
+      return
+    }
+    setErrors({})
+    if (step < TOTAL) setStep((s) => s + 1)
+  }
+
+  function prev() {
+    setErrors({})
+    if (step > 1) setStep((s) => s - 1)
+  }
 
   function handleFinish() {
     const fullName = [data.firstName, data.middleName, data.lastName, data.secondLastName]
@@ -49,9 +80,9 @@ export function PatientStepper() {
   const caseNumber = String(Date.now()).slice(-8).padStart(8, '0')
 
   const steps: Record<number, React.ReactNode> = {
-    1: <Step1Personal      data={data} onChange={update} />,
-    2: <Step2Antecedentes  data={data} onChange={update} />,
-    3: <Step3Lifestyle     data={data} onChange={update} />,
+    1: <Step1Personal      data={data} onChange={update} errors={errors} onValidate={setErrors} />,
+    2: <Step2Antecedentes  data={data} onChange={update} errors={errors} onValidate={setErrors} />,
+    3: <Step3Lifestyle     data={data} onChange={update} errors={errors} onValidate={setErrors} />,
     4: <Step4Measures      data={data} onChange={update} />,
     5: <Step5MealPlan      data={data} onChange={update} />,
     6: <Step6Summary       data={data} caseNumber={caseNumber} />,
@@ -59,149 +90,96 @@ export function PatientStepper() {
 
   return (
     <div style={{
-      position: 'absolute',
-      inset: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: 'var(--cream-50)',
-      overflow: 'hidden',
+      position: 'absolute', inset: 0,
+      display: 'flex', flexDirection: 'column',
+      backgroundColor: 'var(--cream-50)', overflow: 'hidden',
     }}>
-
-      {/* ── Top bar ────────────────────────────────────────── */}
+      {/* Top bar */}
       <div style={{
-        flexShrink: 0,
-        height: 56,
-        padding: '0 24px',
-        backgroundColor: 'var(--white)',
-        borderBottom: '1px solid var(--green-100)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexShrink: 0, height: 56, padding: '0 24px',
+        backgroundColor: 'var(--white)', borderBottom: '1px solid var(--green-100)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--green-950)', letterSpacing: '-0.02em' }}>
           Nueva consulta
         </h1>
-        <button
-          onClick={() => router.back()}
+        <button onClick={() => router.back()}
           style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink-400)', background: 'none', border: 'none', cursor: 'pointer' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-900)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-400)')}
-        >
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-400)')}>
           Cancelar
         </button>
       </div>
 
-      {/* ── Stepper progress ───────────────────────────────── */}
+      {/* Progress */}
       <div style={{ flexShrink: 0, padding: '14px 24px' }}>
         <StepperProgress current={step} />
       </div>
 
-      {/* ── Scrollable content ─────────────────────────────── */}
+      {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
         <div style={{
-          backgroundColor: 'var(--white)',
-          borderRadius: 'var(--r-md)',
-          padding: '28px',
-          border: '1px solid var(--green-100)',
-          boxShadow: 'var(--shadow-card)',
+          backgroundColor: 'var(--white)', borderRadius: 'var(--r-md)',
+          padding: '28px', border: '1px solid var(--green-100)', boxShadow: 'var(--shadow-card)',
         }}>
           {steps[step]}
         </div>
       </div>
 
-      {/* ── Footer — mismo fondo que el DS ─────────────────── */}
+      {/* Footer */}
       <div style={{
-        flexShrink: 0,
-        height: 68,
-        padding: '0 24px',
-        backgroundColor: 'var(--white)',
-        borderTop: '1px solid var(--green-100)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexShrink: 0, height: 68, padding: '0 24px',
+        backgroundColor: 'var(--white)', borderTop: '1px solid var(--green-100)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-
-        {/* Anterior */}
         {step > 1 ? (
-          <button
-            onClick={prev}
+          <button onClick={prev}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '9px 20px',
-              borderRadius: 'var(--r-sm)',
-              border: '1px solid var(--green-200)',
-              backgroundColor: 'var(--white)',
-              color: 'var(--ink-700)',
-              fontSize: '14px', fontWeight: 600,
-              cursor: 'pointer',
+              padding: '9px 20px', borderRadius: 'var(--r-sm)',
+              border: '1px solid var(--green-200)', backgroundColor: 'var(--white)',
+              color: 'var(--ink-700)', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-50)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--white)')}
-          >
-            <ArrowLeft size={16} strokeWidth={2.25} />
-            Anterior
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--white)')}>
+            <ArrowLeft size={16} strokeWidth={2.25} /> Anterior
           </button>
         ) : <div style={{ width: 110 }} />}
 
-        {/* Dots + paso */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {Array.from({ length: TOTAL }, (_, i) => i + 1).map((s) => (
-            <div
-              key={s}
-              style={{
-                width:  s === step ? 22 : 8,
-                height: 8,
-                borderRadius: 9999,
-                backgroundColor: s === step
-                  ? 'var(--green-950)'
-                  : s < step
-                  ? 'var(--green-400)'
-                  : 'var(--green-100)',
-                transition: 'all 150ms cubic-bezier(0.2, 0, 0, 1)',
-              }}
-            />
+            <div key={s} style={{
+              width: s === step ? 22 : 8, height: 8, borderRadius: 9999,
+              backgroundColor: s === step ? 'var(--green-950)' : s < step ? 'var(--green-400)' : 'var(--green-100)',
+              transition: 'all 150ms cubic-bezier(0.2, 0, 0, 1)',
+            }} />
           ))}
           <span style={{ marginLeft: 10, fontSize: '13px', fontWeight: 500, color: 'var(--ink-400)' }}>
             Paso {step} de {TOTAL}
           </span>
         </div>
 
-        {/* Continuar / Finalizar */}
         {step < TOTAL ? (
-          <button
-            onClick={next}
+          <button onClick={next}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '9px 24px',
-              borderRadius: 'var(--r-sm)',
-              border: 'none',
-              backgroundColor: 'var(--green-950)',
-              color: 'white',
-              fontSize: '14px', fontWeight: 700,
-              cursor: 'pointer',
+              padding: '9px 24px', borderRadius: 'var(--r-sm)',
+              border: 'none', backgroundColor: 'var(--green-950)',
+              color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-700)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-950)')}
-          >
-            Continuar
-            <ArrowRight size={16} strokeWidth={2.25} />
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-950)')}>
+            Continuar <ArrowRight size={16} strokeWidth={2.25} />
           </button>
         ) : (
-          <button
-            onClick={handleFinish}
-            disabled={isPending}
+          <button onClick={handleFinish} disabled={isPending}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '9px 24px',
-              borderRadius: 'var(--r-sm)',
-              border: 'none',
-              backgroundColor: 'var(--green-700)',
-              color: 'white',
-              fontSize: '14px', fontWeight: 700,
-              cursor: isPending ? 'not-allowed' : 'pointer',
-              opacity: isPending ? 0.7 : 1,
-            }}
-          >
+              padding: '9px 24px', borderRadius: 'var(--r-sm)',
+              border: 'none', backgroundColor: 'var(--green-700)',
+              color: 'white', fontSize: '14px', fontWeight: 700,
+              cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.7 : 1,
+            }}>
             <Check size={16} strokeWidth={2.5} />
             {isPending ? 'Guardando...' : 'Finalizar y enviar'}
           </button>
