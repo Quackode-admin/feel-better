@@ -37,7 +37,7 @@ export default function PatientsPage() {
               Nuevo paciente
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
             <DialogHeader>
               <DialogTitle
                 className="text-lg font-bold"
