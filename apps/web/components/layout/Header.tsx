@@ -4,13 +4,12 @@ import { UserButton } from '@clerk/nextjs'
 import { Bell } from 'lucide-react'
 
 interface HeaderProps {
-  user: any
+  firstName: string
+  lastName: string
 }
 
-export function Header({ user }: HeaderProps) {
-  const firstName = user?.firstName ?? ''
-  const lastName  = user?.lastName  ?? ''
-  const fullName  = [firstName, lastName].filter(Boolean).join(' ')
+export function Header({ firstName, lastName }: HeaderProps) {
+  const fullName = [firstName, lastName].filter(Boolean).join(' ')
 
   return (
     <header
@@ -31,7 +30,6 @@ export function Header({ user }: HeaderProps) {
         zIndex: 40,
       }}
     >
-      {/* Bell */}
       <button
         aria-label="Notificaciones"
         style={{
@@ -44,7 +42,6 @@ export function Header({ user }: HeaderProps) {
           border: 'none',
           backgroundColor: 'transparent',
           cursor: 'pointer',
-          transition: 'background-color 150ms cubic-bezier(0.2, 0, 0, 1)',
         }}
         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-50)')}
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -52,7 +49,6 @@ export function Header({ user }: HeaderProps) {
         <Bell size={18} strokeWidth={2.25} style={{ color: 'var(--ink-500)' }} />
       </button>
 
-      {/* User */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {fullName && (
           <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink-700)', letterSpacing: '0.14px' }}>
