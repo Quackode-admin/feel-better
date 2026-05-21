@@ -27,7 +27,7 @@ const HERRAMIENTAS = [
 ]
 
 function NavItem({ href, label, icon: Icon, badge, count, active }: {
-  href: string; label: string; icon: any; badge?: boolean; count?: number; active: boolean
+  href: string; label: string; icon: any; badge?: boolean | undefined; count?: number | undefined; active: boolean
 }) {
   return (
     <Link
