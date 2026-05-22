@@ -17,19 +17,27 @@ const TOTAL = 6
 
 function validateStep(step: number, data: StepperData): Record<string, string> {
   const errors: Record<string, string> = {}
+
   if (step === 1) {
-    if (!data.firstName.trim()) errors.firstName = 'Este campo es requerido'
-    if (!data.lastName.trim())  errors.lastName  = 'Este campo es requerido'
-    if (!data.email.trim())     errors.email     = 'Este campo es requerido'
+    if (!data.dui.trim())        errors.dui       = 'Este campo es requerido'
+    if (!data.firstName.trim())  errors.firstName = 'Este campo es requerido'
+    if (!data.lastName.trim())   errors.lastName  = 'Este campo es requerido'
+    if (!data.birthDate.trim())  errors.birthDate = 'Este campo es requerido'
+    if (!data.phone.trim())      errors.phone     = 'Este campo es requerido'
+    if (!data.sex.trim())        errors.sex       = 'Este campo es requerido'
+    if (!data.email.trim())      errors.email     = 'Este campo es requerido'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = 'Correo electrónico inválido'
   }
-  if (step === 2) {
-    if (!data.chronicDiseases.trim()) errors.chronicDiseases = 'Este campo es requerido'
-  }
+
   if (step === 3) {
     if (!data.sleepRoutine.trim())     errors.sleepRoutine     = 'Este campo es requerido'
     if (!data.physicalActivity.trim()) errors.physicalActivity = 'Este campo es requerido'
+    if (!data.foodIntolerances.trim()) errors.foodIntolerances = 'Este campo es requerido'
+    // Validar que al menos Desayuno días de semana tenga contenido
+    const hasAnyDiet = Object.values(data.dietWeekdays).some((v) => v.trim())
+    if (!hasAnyDiet) errors.dietActual = 'Completa al menos un campo de la dieta'
   }
+
   return errors
 }
 
@@ -135,10 +143,10 @@ export function PatientStepper() {
         {step > 1 ? (
           <button onClick={prev}
             style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '9px 20px', borderRadius: 'var(--r-sm)',
-              border: '1px solid var(--green-200)', backgroundColor: 'var(--white)',
-              color: 'var(--ink-700)', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 20px',
+              borderRadius: 'var(--r-sm)', border: '1px solid var(--green-200)',
+              backgroundColor: 'var(--white)', color: 'var(--ink-700)',
+              fontSize: '14px', fontWeight: 600, cursor: 'pointer',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-50)')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--white)')}>
@@ -162,10 +170,10 @@ export function PatientStepper() {
         {step < TOTAL ? (
           <button onClick={next}
             style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '9px 24px', borderRadius: 'var(--r-sm)',
-              border: 'none', backgroundColor: 'var(--green-950)',
-              color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 24px',
+              borderRadius: 'var(--r-sm)', border: 'none',
+              backgroundColor: 'var(--green-950)', color: 'white',
+              fontSize: '14px', fontWeight: 700, cursor: 'pointer',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-700)')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-950)')}>
@@ -174,10 +182,10 @@ export function PatientStepper() {
         ) : (
           <button onClick={handleFinish} disabled={isPending}
             style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '9px 24px', borderRadius: 'var(--r-sm)',
-              border: 'none', backgroundColor: 'var(--green-700)',
-              color: 'white', fontSize: '14px', fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 24px',
+              borderRadius: 'var(--r-sm)', border: 'none',
+              backgroundColor: 'var(--green-700)', color: 'white',
+              fontSize: '14px', fontWeight: 700,
               cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.7 : 1,
             }}>
             <Check size={16} strokeWidth={2.5} />
