@@ -199,7 +199,7 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
   y += 1
 
   // Tabla dieta
-  const dcols = [30, (COL - 30) / 2, (COL - 30) / 2]
+  const dcols: number[] = [30, (COL - 30) / 2, (COL - 30) / 2]
   const headers = ['', 'Días de semana', 'Fines de semana']
   const rowsD  = ['breakfast', 'lunch', 'dinner', 'snacks', 'liquids']
   const rowLabels = ['Desayuno', 'Almuerzo', 'Cena', 'Refrigerios', 'Líquidos']
@@ -248,7 +248,7 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
   y += 1
 
   // Tabla medidas
-  const mcols = [30, 25, 30, 30, 28, 28]
+  const mcols: number[] = [30, 25, 30, 30, 28, 28]
   const mHeaders = ['Medida', 'Meta', 'Anterior', 'Actual · hoy', 'Δ vs anterior', 'Δ total']
   const MEASURES_PDF = [
     { key: 'weight', label: 'Peso (kg)' },
@@ -377,7 +377,7 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
   // Tabla plan alimenticio
   const days = ['LUNES', 'MARTES', 'MIÉRC.', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO']
   const mealCols = ['Desayuno', 'Almuerzo', 'Cena', 'Meriendas']
-  const planCols = [16, (COL - 16) / 4, (COL - 16) / 4, (COL - 16) / 4, (COL - 16) / 4]
+  const planCols: number[] = [16, (COL - 16) / 4, (COL - 16) / 4, (COL - 16) / 4, (COL - 16) / 4]
 
   // Header
   setFill(doc, GREEN_950); doc.rect(MARGIN, y, COL, 7, 'F')
