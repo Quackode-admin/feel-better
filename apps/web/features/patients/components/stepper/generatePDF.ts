@@ -210,12 +210,12 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
   let cx = MARGIN
   headers.forEach((h, i) => {
     setDraw(doc, GREEN_100)
-    doc.rect(cx, y, dcols[i], 6, 'D')
+    doc.rect(cx, y, dcols[i]!, 6, 'D')
     setTextColor(doc, INK_500)
     doc.setFontSize(6.5)
     doc.setFont('helvetica', 'bold')
     if (h) doc.text(h.toUpperCase(), cx + 2, y + 4)
-    cx += dcols[i]
+    cx += dcols[i]!
   })
   y += 6
 
@@ -227,12 +227,12 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
     ;[rowLabels[idx], wdVal, weVal].forEach((val, i) => {
       const bg = i === 0 ? GREEN_25 : WHITE
       setFill(doc, bg); setDraw(doc, GREEN_100)
-      doc.rect(cx, y, dcols[i], rowH, 'FD')
+      doc.rect(cx, y, dcols[i]!, rowH, 'FD')
       setTextColor(doc, i === 0 ? INK_700 : INK_900)
       doc.setFontSize(7)
       doc.setFont('helvetica', i === 0 ? 'bold' : 'normal')
       doc.text(val, cx + 2, y + 5.5)
-      cx += dcols[i]
+      cx += dcols[i]!
     })
     y += rowH
   })
@@ -264,10 +264,10 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
   setFill(doc, GREEN_100); doc.rect(MARGIN, y, COL, 6, 'F')
   cx = MARGIN
   mHeaders.forEach((h, i) => {
-    setDraw(doc, GREEN_100); doc.rect(cx, y, mcols[i], 6, 'D')
+    setDraw(doc, GREEN_100); doc.rect(cx, y, mcols[i]!, 6, 'D')
     setTextColor(doc, INK_500); doc.setFontSize(6); doc.setFont('helvetica', 'bold')
     doc.text(h.toUpperCase(), cx + 1.5, y + 4)
-    cx += mcols[i]
+    cx += mcols[i]!
   })
   y += 6
 
@@ -293,12 +293,12 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
       const isTrend = i >= 4
       const bg = i === 0 ? GREEN_25 : WHITE
       setFill(doc, bg); setDraw(doc, GREEN_100)
-      doc.rect(cx, y, mcols[i], rowH, 'FD')
+      doc.rect(cx, y, mcols[i]!, rowH, 'FD')
       const color = isTrend && val.startsWith('▼') ? '#2D7A3A' : isTrend && val.startsWith('▲') ? '#C0392B' : i === 0 ? INK_700 : INK_900
       setTextColor(doc, color)
       doc.setFontSize(7.5); doc.setFont('helvetica', i === 0 ? 'bold' : 'normal')
       doc.text(val, cx + 1.5, y + 5)
-      cx += mcols[i]
+      cx += mcols[i]!
     })
     y += rowH
   })
@@ -383,10 +383,10 @@ export async function generateConsultaPDF(data: StepperData, caseNumber: string)
   setFill(doc, GREEN_950); doc.rect(MARGIN, y, COL, 7, 'F')
   cx = MARGIN
   ;['', ...mealCols].forEach((h, i) => {
-    setDraw(doc, GREEN_700); doc.rect(cx, y, planCols[i], 7, 'D')
+    setDraw(doc, GREEN_700); doc.rect(cx, y, planCols[i]!, 7, 'D')
     setTextColor(doc, WHITE); doc.setFontSize(6.5); doc.setFont('helvetica', 'bold')
     if (h) doc.text(h.toUpperCase(), cx + 1.5, y + 4.5)
-    cx += planCols[i]
+    cx += planCols[i]!
   })
   y += 7
 
