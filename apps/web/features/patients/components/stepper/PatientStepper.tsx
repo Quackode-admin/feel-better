@@ -12,12 +12,12 @@ import { Step6Summary }      from './Step6Summary'
 import { INITIAL_DATA, StepperData } from './types'
 import { useCreatePatient }  from '../../hooks/usePatients'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { toast } from 'sonner'
 
 const TOTAL = 6
 
 function validateStep(step: number, data: StepperData): Record<string, string> {
   const errors: Record<string, string> = {}
-
   if (step === 1) {
     if (!data.dui.trim())       errors.dui       = 'Este campo es requerido'
     if (!data.firstName.trim()) errors.firstName = 'Este campo es requerido'
@@ -28,7 +28,6 @@ function validateStep(step: number, data: StepperData): Record<string, string> {
     if (!data.email.trim())     errors.email     = 'Este campo es requerido'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = 'Correo electrónico inválido'
   }
-
   if (step === 3) {
     if (!data.sleepRoutine.trim())     errors.sleepRoutine     = 'Este campo es requerido'
     if (!data.physicalActivity.trim()) errors.physicalActivity = 'Este campo es requerido'
@@ -36,27 +35,27 @@ function validateStep(step: number, data: StepperData): Record<string, string> {
     const hasAnyDiet = Object.values(data.dietWeekdays).some((v) => v.trim())
     if (!hasAnyDiet) errors.dietActual = 'Completa al menos un campo de la dieta'
   }
-
   if (step === 4) {
     if (!data.nextAppointment.trim()) errors.nextAppointment = 'Este campo es requerido'
   }
-
   if (step === 5) {
     const hasAnyMeal = data.mealPlan.some((row) =>
       Object.entries(row).filter(([k]) => k !== 'day').some(([, v]) => (v as string).trim())
     )
     if (!hasAnyMeal) errors.mealPlan = 'Completa al menos un campo del plan alimenticio'
   }
-
   return errors
 }
 
 export function PatientStepper() {
-  const [step, setStep]     = useState(1)
-  const [data, setData]     = useState<StepperData>(INITIAL_DATA)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const { mutate, isPending } = useCreatePatient()
+  const [step, setStep]           = useState(1)
+  const [data, setData]           = useState<StepperData>(INITIAL_DATA)
+  const [errors, setErrors]       = useState<Record<string, string>>({})
+  const [isPDFGenerating, setPDF] = useState(false)
+  const { mutate, isPending }     = useCreatePatient()
   const router = useRouter()
+
+  const caseNumber = useState(() => String(Date.now()).slice(-8).padStart(8, '0'))[0]
 
   function update(partial: Partial<StepperData>) {
     setData((prev) => ({ ...prev, ...partial }))
@@ -64,10 +63,7 @@ export function PatientStepper() {
 
   function next() {
     const stepErrors = validateStep(step, data)
-    if (Object.keys(stepErrors).length > 0) {
-      setErrors(stepErrors)
-      return
-    }
+    if (Object.keys(stepErrors).length > 0) { setErrors(stepErrors); return }
     setErrors({})
     if (step < TOTAL) setStep((s) => s + 1)
   }
@@ -77,25 +73,40 @@ export function PatientStepper() {
     if (step > 1) setStep((s) => s - 1)
   }
 
+  async function handleDownloadPDF() {
+    setPDF(true)
+    try {
+      const { generateConsultaPDF } = await import('./generatePDF')
+      await generateConsultaPDF(data, caseNumber)
+      toast.success('PDF descargado correctamente')
+    } catch (e) {
+      toast.error('Error generando el PDF')
+    } finally {
+      setPDF(false)
+    }
+  }
+
   function handleFinish() {
     const fullName = [data.firstName, data.middleName, data.lastName, data.secondLastName]
       .filter(Boolean).join(' ')
     mutate(
       {
-        fullName,
-        email:           data.email,
-        phone:           data.phone || undefined,
-        birthDate:       data.birthDate || undefined,
+        fullName, email: data.email,
+        phone:           data.phone           || undefined,
+        birthDate:       data.birthDate       || undefined,
         heightCm:        data.measures.height.current ? parseFloat(data.measures.height.current) * 100 : undefined,
         initialWeightKg: data.measures.weight.previous ? parseFloat(data.measures.weight.previous) : undefined,
         targetWeightKg:  data.measures.weight.goal     ? parseFloat(data.measures.weight.goal)     : undefined,
         medicalNotes:    [data.chronicDiseases, data.nonChronicDiseases, data.medicalTreatments].filter(Boolean).join(' | ') || undefined,
       },
-      { onSuccess: () => router.push('/patients') },
+      {
+        onSuccess: async () => {
+          await handleDownloadPDF()
+          router.push('/patients')
+        },
+      },
     )
   }
-
-  const caseNumber = String(Date.now()).slice(-8).padStart(8, '0')
 
   const steps: Record<number, React.ReactNode> = {
     1: <Step1Personal      data={data} onChange={update} errors={errors} onValidate={setErrors} />,
@@ -103,26 +114,15 @@ export function PatientStepper() {
     3: <Step3Lifestyle     data={data} onChange={update} errors={errors} onValidate={setErrors} />,
     4: <Step4Measures      data={data} onChange={update} errors={errors} onValidate={setErrors} />,
     5: <Step5MealPlan      data={data} onChange={update} errors={errors} onValidate={setErrors} />,
-    6: <Step6Summary       data={data} caseNumber={caseNumber} />,
+    6: <Step6Summary       data={data} caseNumber={caseNumber} onDownloadPDF={handleDownloadPDF} isPDFGenerating={isPDFGenerating} />,
   }
 
   return (
-    <div style={{
-      position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-      backgroundColor: 'var(--cream-50)', overflow: 'hidden',
-    }}>
-      <div style={{
-        flexShrink: 0, height: 56, padding: '0 24px',
-        backgroundColor: 'var(--white)', borderBottom: '1px solid var(--green-100)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--green-950)', letterSpacing: '-0.02em' }}>
-          Nueva consulta
-        </h1>
-        <button onClick={() => router.back()}
-          style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink-400)', background: 'none', border: 'none', cursor: 'pointer' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-900)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-400)')}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--cream-50)', overflow: 'hidden' }}>
+      <div style={{ flexShrink: 0, height: 56, padding: '0 24px', backgroundColor: 'var(--white)', borderBottom: '1px solid var(--green-100)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--green-950)', letterSpacing: '-0.02em' }}>Nueva consulta</h1>
+        <button onClick={() => router.back()} style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink-400)', background: 'none', border: 'none', cursor: 'pointer' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-900)')} onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-400)')}>
           Cancelar
         </button>
       </div>
@@ -132,27 +132,15 @@ export function PatientStepper() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        <div style={{
-          backgroundColor: 'var(--white)', borderRadius: 'var(--r-md)',
-          padding: '28px', border: '1px solid var(--green-100)', boxShadow: 'var(--shadow-card)',
-        }}>
+        <div style={{ backgroundColor: 'var(--white)', borderRadius: 'var(--r-md)', padding: '28px', border: '1px solid var(--green-100)', boxShadow: 'var(--shadow-card)' }}>
           {steps[step]}
         </div>
       </div>
 
-      <div style={{
-        flexShrink: 0, height: 68, padding: '0 24px',
-        backgroundColor: 'var(--white)', borderTop: '1px solid var(--green-100)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div style={{ flexShrink: 0, height: 68, padding: '0 24px', backgroundColor: 'var(--white)', borderTop: '1px solid var(--green-100)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {step > 1 ? (
           <button onClick={prev}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 20px',
-              borderRadius: 'var(--r-sm)', border: '1px solid var(--green-200)',
-              backgroundColor: 'var(--white)', color: 'var(--ink-700)',
-              fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-            }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 20px', borderRadius: 'var(--r-sm)', border: '1px solid var(--green-200)', backgroundColor: 'var(--white)', color: 'var(--ink-700)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-50)')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--white)')}>
             <ArrowLeft size={16} strokeWidth={2.25} /> Anterior
@@ -161,40 +149,23 @@ export function PatientStepper() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {Array.from({ length: TOTAL }, (_, i) => i + 1).map((s) => (
-            <div key={s} style={{
-              width: s === step ? 22 : 8, height: 8, borderRadius: 9999,
-              backgroundColor: s === step ? 'var(--green-950)' : s < step ? 'var(--green-400)' : 'var(--green-100)',
-              transition: 'all 150ms cubic-bezier(0.2, 0, 0, 1)',
-            }} />
+            <div key={s} style={{ width: s === step ? 22 : 8, height: 8, borderRadius: 9999, backgroundColor: s === step ? 'var(--green-950)' : s < step ? 'var(--green-400)' : 'var(--green-100)', transition: 'all 150ms cubic-bezier(0.2, 0, 0, 1)' }} />
           ))}
-          <span style={{ marginLeft: 10, fontSize: '13px', fontWeight: 500, color: 'var(--ink-400)' }}>
-            Paso {step} de {TOTAL}
-          </span>
+          <span style={{ marginLeft: 10, fontSize: '13px', fontWeight: 500, color: 'var(--ink-400)' }}>Paso {step} de {TOTAL}</span>
         </div>
 
         {step < TOTAL ? (
           <button onClick={next}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 24px',
-              borderRadius: 'var(--r-sm)', border: 'none',
-              backgroundColor: 'var(--green-950)', color: 'white',
-              fontSize: '14px', fontWeight: 700, cursor: 'pointer',
-            }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 24px', borderRadius: 'var(--r-sm)', border: 'none', backgroundColor: 'var(--green-950)', color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-700)')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--green-950)')}>
             Continuar <ArrowRight size={16} strokeWidth={2.25} />
           </button>
         ) : (
-          <button onClick={handleFinish} disabled={isPending}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 24px',
-              borderRadius: 'var(--r-sm)', border: 'none',
-              backgroundColor: 'var(--green-700)', color: 'white',
-              fontSize: '14px', fontWeight: 700,
-              cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.7 : 1,
-            }}>
+          <button onClick={handleFinish} disabled={isPending || isPDFGenerating}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 24px', borderRadius: 'var(--r-sm)', border: 'none', backgroundColor: 'var(--green-700)', color: 'white', fontSize: '14px', fontWeight: 700, cursor: (isPending || isPDFGenerating) ? 'not-allowed' : 'pointer', opacity: (isPending || isPDFGenerating) ? 0.7 : 1 }}>
             <Check size={16} strokeWidth={2.5} />
-            {isPending ? 'Guardando...' : 'Finalizar y enviar'}
+            {isPending ? 'Guardando...' : isPDFGenerating ? 'Generando PDF...' : 'Finalizar y enviar'}
           </button>
         )}
       </div>

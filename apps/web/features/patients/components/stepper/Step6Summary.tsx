@@ -1,14 +1,16 @@
 'use client'
 
 import { StepperData } from './types'
-import { Check, TrendingDown, TrendingUp, Minus } from 'lucide-react'
+import { Check, TrendingDown, TrendingUp, Minus, Download } from 'lucide-react'
 
 interface Props {
   data: StepperData
   caseNumber: string
+  onDownloadPDF?: () => void
+  isPDFGenerating?: boolean
 }
 
-export function Step6Summary({ data, caseNumber }: Props) {
+export function Step6Summary({ data, caseNumber, onDownloadPDF, isPDFGenerating }: Props) {
   const fullName = [data.firstName, data.middleName, data.lastName, data.secondLastName]
     .filter(Boolean).join(' ')
   const today = new Date().toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -30,7 +32,6 @@ export function Step6Summary({ data, caseNumber }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-500)" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
@@ -40,18 +41,33 @@ export function Step6Summary({ data, caseNumber }: Props) {
         </span>
       </div>
 
-      {/* Banner de éxito */}
+      {/* Banner */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--green-50)', border: '1px solid var(--green-200)' }}>
         <Check size={16} strokeWidth={2.5} style={{ color: 'var(--green-700)', flexShrink: 0 }} />
-        <p style={{ fontSize: '13px', color: 'var(--ink-700)' }}>
+        <p style={{ fontSize: '13px', color: 'var(--ink-700)', flex: 1 }}>
           La consulta está lista. Se enviará un resumen por correo a{' '}
-          <strong style={{ color: 'var(--ink-900)' }}>{data.email || 'el paciente'}</strong>{' '}
-          y al nutricionista.
+          <strong style={{ color: 'var(--ink-900)' }}>{data.email || 'el paciente'}</strong>.
         </p>
+        {onDownloadPDF && (
+          <button
+            onClick={onDownloadPDF}
+            disabled={isPDFGenerating}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px', borderRadius: 'var(--r-sm)',
+              border: '1px solid var(--green-200)',
+              backgroundColor: 'var(--white)', color: 'var(--green-800)',
+              fontSize: '12px', fontWeight: 600, cursor: isPDFGenerating ? 'not-allowed' : 'pointer',
+              opacity: isPDFGenerating ? 0.6 : 1, flexShrink: 0,
+            }}
+          >
+            <Download size={14} strokeWidth={2.25} />
+            {isPDFGenerating ? 'Generando...' : 'Descargar PDF'}
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-
         {/* Datos del caso */}
         <div style={{ padding: '20px 24px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--green-25)', border: '1px solid var(--green-100)' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ink-500)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 16 }}>
@@ -71,62 +87,33 @@ export function Step6Summary({ data, caseNumber }: Props) {
           ))}
         </div>
 
-        {/* Feature card — Comparativa de progreso */}
-        <div style={{
-          padding: '20px 24px', borderRadius: 'var(--r-md)',
-          backgroundColor: 'var(--green-700)', position: 'relative', overflow: 'hidden',
-        }}>
-          {/* Círculo decorativo DS */}
+        {/* Feature card */}
+        <div style={{ padding: '20px 24px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--green-700)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.08)', bottom: -20, right: -20 }} />
+          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--green-500)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 16 }}>Progreso</p>
 
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--green-500)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 16 }}>
-            Progreso
-          </p>
-
-          {/* Peso anterior */}
           <div style={{ marginBottom: 10 }}>
             <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green-500)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>PESO ANTERIOR</p>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>
-              {previousWeight ? `${previousWeight} kg` : '—'}
-            </p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>{previousWeight ? `${previousWeight} kg` : '—'}</p>
           </div>
 
-          {/* Peso actual + indicador comparativo */}
           <div style={{ marginBottom: 10 }}>
             <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green-500)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>PESO ACTUAL</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>
-                {currentWeight ? `${currentWeight} kg` : '—'}
-              </p>
-              {weightTrend === 'down' && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '12px', fontWeight: 600, color: 'var(--green-400)' }}>
-                  <TrendingDown size={14} /> {Math.abs(diff!).toFixed(1)} kg
-                </span>
-              )}
-              {weightTrend === 'up' && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '12px', fontWeight: 600, color: 'var(--warm-100)' }}>
-                  <TrendingUp size={14} /> +{Math.abs(diff!).toFixed(1)} kg
-                </span>
-              )}
-              {weightTrend === 'same' && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>
-                  <Minus size={14} /> Sin cambio
-                </span>
-              )}
+              <p style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>{currentWeight ? `${currentWeight} kg` : '—'}</p>
+              {weightTrend === 'down' && <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '12px', fontWeight: 600, color: 'var(--green-400)' }}><TrendingDown size={14} /> {Math.abs(diff!).toFixed(1)} kg</span>}
+              {weightTrend === 'up'   && <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '12px', fontWeight: 600, color: 'var(--warm-100)' }}><TrendingUp size={14} /> +{Math.abs(diff!).toFixed(1)} kg</span>}
+              {weightTrend === 'same' && <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}><Minus size={14} /> Sin cambio</span>}
             </div>
           </div>
 
-          {/* Meta restante */}
           <div style={{ marginBottom: 10 }}>
             <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green-500)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>META RESTANTE</p>
             <p style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>
-              {goalWeight && currentWeight
-                ? `${Math.abs(parseFloat(goalWeight) - parseFloat(currentWeight)).toFixed(1)} kg para ${goalWeight} kg`
-                : '—'}
+              {goalWeight && currentWeight ? `${Math.abs(parseFloat(goalWeight) - parseFloat(currentWeight)).toFixed(1)} kg para ${goalWeight} kg` : '—'}
             </p>
           </div>
 
-          {/* Próxima cita */}
           <div>
             <p style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green-500)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>PRÓXIMA CITA</p>
             <p style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>{nextApptFormatted}</p>
