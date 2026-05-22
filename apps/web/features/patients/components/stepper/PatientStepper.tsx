@@ -19,13 +19,13 @@ function validateStep(step: number, data: StepperData): Record<string, string> {
   const errors: Record<string, string> = {}
 
   if (step === 1) {
-    if (!data.dui.trim())        errors.dui       = 'Este campo es requerido'
-    if (!data.firstName.trim())  errors.firstName = 'Este campo es requerido'
-    if (!data.lastName.trim())   errors.lastName  = 'Este campo es requerido'
-    if (!data.birthDate.trim())  errors.birthDate = 'Este campo es requerido'
-    if (!data.phone.trim())      errors.phone     = 'Este campo es requerido'
-    if (!data.sex.trim())        errors.sex       = 'Este campo es requerido'
-    if (!data.email.trim())      errors.email     = 'Este campo es requerido'
+    if (!data.dui.trim())       errors.dui       = 'Este campo es requerido'
+    if (!data.firstName.trim()) errors.firstName = 'Este campo es requerido'
+    if (!data.lastName.trim())  errors.lastName  = 'Este campo es requerido'
+    if (!data.birthDate.trim()) errors.birthDate = 'Este campo es requerido'
+    if (!data.phone.trim())     errors.phone     = 'Este campo es requerido'
+    if (!data.sex.trim())       errors.sex       = 'Este campo es requerido'
+    if (!data.email.trim())     errors.email     = 'Este campo es requerido'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = 'Correo electrónico inválido'
   }
 
@@ -33,9 +33,19 @@ function validateStep(step: number, data: StepperData): Record<string, string> {
     if (!data.sleepRoutine.trim())     errors.sleepRoutine     = 'Este campo es requerido'
     if (!data.physicalActivity.trim()) errors.physicalActivity = 'Este campo es requerido'
     if (!data.foodIntolerances.trim()) errors.foodIntolerances = 'Este campo es requerido'
-    // Validar que al menos Desayuno días de semana tenga contenido
     const hasAnyDiet = Object.values(data.dietWeekdays).some((v) => v.trim())
     if (!hasAnyDiet) errors.dietActual = 'Completa al menos un campo de la dieta'
+  }
+
+  if (step === 4) {
+    if (!data.nextAppointment.trim()) errors.nextAppointment = 'Este campo es requerido'
+  }
+
+  if (step === 5) {
+    const hasAnyMeal = data.mealPlan.some((row) =>
+      Object.entries(row).filter(([k]) => k !== 'day').some(([, v]) => (v as string).trim())
+    )
+    if (!hasAnyMeal) errors.mealPlan = 'Completa al menos un campo del plan alimenticio'
   }
 
   return errors
@@ -91,18 +101,16 @@ export function PatientStepper() {
     1: <Step1Personal      data={data} onChange={update} errors={errors} onValidate={setErrors} />,
     2: <Step2Antecedentes  data={data} onChange={update} errors={errors} onValidate={setErrors} />,
     3: <Step3Lifestyle     data={data} onChange={update} errors={errors} onValidate={setErrors} />,
-    4: <Step4Measures      data={data} onChange={update} />,
-    5: <Step5MealPlan      data={data} onChange={update} />,
+    4: <Step4Measures      data={data} onChange={update} errors={errors} onValidate={setErrors} />,
+    5: <Step5MealPlan      data={data} onChange={update} errors={errors} onValidate={setErrors} />,
     6: <Step6Summary       data={data} caseNumber={caseNumber} />,
   }
 
   return (
     <div style={{
-      position: 'absolute', inset: 0,
-      display: 'flex', flexDirection: 'column',
+      position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
       backgroundColor: 'var(--cream-50)', overflow: 'hidden',
     }}>
-      {/* Top bar */}
       <div style={{
         flexShrink: 0, height: 56, padding: '0 24px',
         backgroundColor: 'var(--white)', borderBottom: '1px solid var(--green-100)',
@@ -119,12 +127,10 @@ export function PatientStepper() {
         </button>
       </div>
 
-      {/* Progress */}
       <div style={{ flexShrink: 0, padding: '14px 24px' }}>
         <StepperProgress current={step} />
       </div>
 
-      {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
         <div style={{
           backgroundColor: 'var(--white)', borderRadius: 'var(--r-md)',
@@ -134,7 +140,6 @@ export function PatientStepper() {
         </div>
       </div>
 
-      {/* Footer */}
       <div style={{
         flexShrink: 0, height: 68, padding: '0 24px',
         backgroundColor: 'var(--white)', borderTop: '1px solid var(--green-100)',
