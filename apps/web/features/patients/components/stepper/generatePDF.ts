@@ -1,449 +1,291 @@
 import jsPDF from 'jspdf'
 import { StepperData } from './types'
 
-// ── Feel Better DS Colors ──────────────────────────────────────────────────
-const GREEN_950  = '#154212'
-const GREEN_700  = '#2D5A27'
-const GREEN_500  = '#9DD090'
-const GREEN_100  = '#E7E9E1'
-const GREEN_25   = '#F3F4ED'
-const INK_900    = '#191C18'
-const INK_700    = '#42493E'
-const INK_500    = '#72796E'
-const INK_400    = '#9CA3AF'
-const WHITE      = '#FFFFFF'
-const CREAM      = '#FAFAFA'
+const G950 = '#154212'
+const G700 = '#2D5A27'
+const G500 = '#9DD090'
+const G200 = '#C2C9BB'
+const G100 = '#E7E9E1'
+const G25  = '#F3F4ED'
+const I900 = '#191C18'
+const I700 = '#42493E'
+const I500 = '#72796E'
+const WHT  = '#FFFFFF'
+const CRM  = '#FAFAFA'
+const PW   = 210
+const PH   = 297
+const MG   = 14
+const COL  = PW - MG * 2
 
-const PAGE_W = 210  // A4 mm
-const PAGE_H = 297
-const MARGIN = 14
-const COL    = PAGE_W - MARGIN * 2
+function rgb(h: string): [number, number, number] {
+  return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]
+}
+function sf(d: jsPDF, h: string) { d.setFillColor(...rgb(h)) }
+function sd(d: jsPDF, h: string) { d.setDrawColor(...rgb(h)) }
+function st(d: jsPDF, h: string) { d.setTextColor(...rgb(h)) }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-function hex2rgb(hex: string): [number, number, number] {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return [r, g, b]
+function secHead(d: jsPDF, y: number, lbl: string): number {
+  sf(d,G950); d.rect(MG,y,COL,7,'F')
+  st(d,WHT); d.setFontSize(8); d.setFont('helvetica','bold')
+  d.text(lbl.toUpperCase(), MG+3, y+5)
+  return y+7
 }
 
-function setFill(doc: jsPDF, hex: string) { doc.setFillColor(...hex2rgb(hex)) }
-function setDraw(doc: jsPDF, hex: string) { doc.setDrawColor(...hex2rgb(hex)) }
-function setTextColor(doc: jsPDF, hex: string) { doc.setTextColor(...hex2rgb(hex)) }
-
-function sectionHeader(doc: jsPDF, y: number, label: string): number {
-  setFill(doc, GREEN_950)
-  doc.rect(MARGIN, y, COL, 7, 'F')
-  setTextColor(doc, WHITE)
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'bold')
-  doc.text(label.toUpperCase(), MARGIN + 3, y + 5)
-  return y + 7
+function txtBlock(d: jsPDF, x: number, y: number, w: number, lbl: string, val: string): number {
+  const v = val||'—'
+  const lines = d.splitTextToSize(v, w-4) as string[]
+  const h = Math.max(14, lines.length*4+8)
+  sf(d,CRM); sd(d,G100); d.rect(x,y,w,h,'FD')
+  st(d,G700); d.setFontSize(6.5); d.setFont('helvetica','bold')
+  d.text(lbl.toUpperCase(), x+2, y+4.5)
+  st(d,I700); d.setFontSize(7.5); d.setFont('helvetica','normal')
+  d.text(lines, x+2, y+9)
+  return y+h+2
 }
 
-function subHeader(doc: jsPDF, y: number, label: string): number {
-  setFill(doc, GREEN_700)
-  doc.rect(MARGIN, y, COL, 5.5, 'F')
-  setTextColor(doc, GREEN_500)
-  doc.setFontSize(7)
-  doc.setFont('helvetica', 'bold')
-  doc.text(label.toUpperCase(), MARGIN + 2, y + 4)
-  return y + 5.5
+function dCell(d: jsPDF, x: number, y: number, w: number, h: number, lbl: string, val: string, bg=CRM) {
+  sf(d,bg); sd(d,G100); d.rect(x,y,w,h,'FD')
+  st(d,I500); d.setFontSize(6); d.setFont('helvetica','bold')
+  d.text(lbl.toUpperCase(), x+2, y+4)
+  st(d,I900); d.setFontSize(8); d.setFont('helvetica','normal')
+  const lines = d.splitTextToSize(val||'—', w-4) as string[]
+  d.text(lines, x+2, y+8)
 }
 
-function cell(doc: jsPDF, x: number, y: number, w: number, h: number, label: string, value: string, bg = CREAM) {
-  setFill(doc, bg)
-  setDraw(doc, GREEN_100)
-  doc.rect(x, y, w, h, 'FD')
-
-  setTextColor(doc, INK_500)
-  doc.setFontSize(6)
-  doc.setFont('helvetica', 'bold')
-  doc.text(label.toUpperCase(), x + 2, y + 4)
-
-  setTextColor(doc, INK_900)
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  const lines = doc.splitTextToSize(value || '—', w - 4)
-  doc.text(lines, x + 2, y + 8)
+function pgHead(d: jsPDF, cas: string, nm: string, pg: number, tot: number) {
+  sf(d,G950); d.rect(0,0,55,14,'F')
+  st(d,WHT); d.setFontSize(11); d.setFont('helvetica','bold'); d.text('Feel Better',5,7)
+  d.setFontSize(6.5); d.setFont('helvetica','normal'); d.text('NUTRICIÓN · PORTAL PROFESIONAL',5,11.5)
+  st(d,G950); d.setFontSize(14); d.setFont('helvetica','bold')
+  d.text('Resumen de cita', PW/2, 8, {align:'center'})
+  st(d,I500); d.setFontSize(7); d.setFont('helvetica','normal')
+  const dt = new Date().toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+  d.text(`CASO #${cas}`, PW-MG, 5, {align:'right'})
+  d.text(nm ? `${nm} · ${dt}` : dt, PW-MG, 9.5, {align:'right'})
+  sd(d,G100); d.setLineWidth(0.3); d.line(0,14,PW,14)
+  sf(d,G25); d.rect(0,PH-8,PW,8,'F')
+  st(d,I500); d.setFontSize(6.5)
+  d.text('Feel Better Nutrición · Portal Profesional · © 2026', MG, PH-3.5)
+  d.text('● Documento confidencial', PW/2, PH-3.5, {align:'center'})
+  d.text(`Página ${pg} de ${tot}`, PW-MG, PH-3.5, {align:'right'})
 }
 
-function textArea(doc: jsPDF, x: number, y: number, w: number, label: string, value: string): number {
-  const lines = doc.splitTextToSize(value || '—', w - 4)
-  const h = Math.max(14, lines.length * 4 + 8)
-
-  setFill(doc, CREAM)
-  setDraw(doc, GREEN_100)
-  doc.rect(x, y, w, h, 'FD')
-
-  setTextColor(doc, GREEN_700)
-  doc.setFontSize(6.5)
-  doc.setFont('helvetica', 'bold')
-  doc.text(label.toUpperCase(), x + 2, y + 4.5)
-
-  setTextColor(doc, INK_700)
-  doc.setFontSize(7.5)
-  doc.setFont('helvetica', 'normal')
-  doc.text(lines, x + 2, y + 9)
-
-  return y + h + 2
-}
-
-function pageHeader(doc: jsPDF, caseNumber: string, patientName: string, page: number, total: number) {
-  // Logo area
-  setFill(doc, GREEN_950)
-  doc.rect(0, 0, 55, 14, 'F')
-  setTextColor(doc, WHITE)
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'bold')
-  doc.text('Feel Better', 5, 7)
-  doc.setFontSize(6.5)
-  doc.setFont('helvetica', 'normal')
-  doc.text('NUTRICIÓN · PORTAL PROFESIONAL', 5, 11.5)
-
-  // Title
-  setTextColor(doc, GREEN_950)
-  doc.setFontSize(14)
-  doc.setFont('helvetica', 'bold')
-  doc.text('Resumen de cita', PAGE_W / 2, 8, { align: 'center' })
-
-  // Case info
-  setTextColor(doc, INK_500)
-  doc.setFontSize(7)
-  doc.setFont('helvetica', 'normal')
-  const dateStr = new Date().toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-  doc.text(`CASO #${caseNumber}`, PAGE_W - MARGIN, 5, { align: 'right' })
-  doc.text(patientName ? `${patientName} · ${dateStr}` : dateStr, PAGE_W - MARGIN, 9.5, { align: 'right' })
-
-  // Divider
-  setDraw(doc, GREEN_100)
-  doc.setLineWidth(0.3)
-  doc.line(0, 14, PAGE_W, 14)
-
-  // Footer
-  setFill(doc, GREEN_25)
-  doc.rect(0, PAGE_H - 8, PAGE_W, 8, 'F')
-  setTextColor(doc, INK_500)
-  doc.setFontSize(6.5)
-  doc.text('Feel Better Nutrición · Portal Profesional · © 2026', MARGIN, PAGE_H - 3.5)
-  doc.text('● Documento confidencial', PAGE_W / 2, PAGE_H - 3.5, { align: 'center' })
-  doc.text(`Página ${page} de ${total}`, PAGE_W - MARGIN, PAGE_H - 3.5, { align: 'right' })
-}
-
-// ── MAIN EXPORT ────────────────────────────────────────────────────────────
 export async function generateConsultaPDF(data: StepperData, caseNumber: string): Promise<void> {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
-  const fullName = [data.firstName, data.middleName, data.lastName, data.secondLastName].filter(Boolean).join(' ')
-  const TOTAL_PAGES = 3
+  const doc = new jsPDF({unit:'mm',format:'a4',orientation:'portrait'})
+  const nm = [data.firstName,data.middleName,data.lastName,data.secondLastName].filter(Boolean).join(' ')
+  const TOT = 3
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PÁGINA 1 — Datos personales + Antecedentes + Estilo de vida
-  // ──────────────────────────────────────────────────────────────────────────
-  pageHeader(doc, caseNumber, fullName, 1, TOTAL_PAGES)
+  pgHead(doc, caseNumber, nm, 1, TOT)
   let y = 17
 
-  // Datos personales
-  y = sectionHeader(doc, y, 'Datos personales del paciente')
+  y = secHead(doc, y, 'Datos personales del paciente')
   y += 1
+  const c4 = COL/4; const rh = 14
+  dCell(doc,MG,         y,c4,rh,'Primer nombre',   data.firstName)
+  dCell(doc,MG+c4,      y,c4,rh,'Segundo nombre',  data.middleName)
+  dCell(doc,MG+c4*2,    y,c4,rh,'Primer apellido', data.lastName)
+  dCell(doc,MG+c4*3,    y,c4,rh,'Segundo apellido',data.secondLastName)
+  y += rh
+  dCell(doc,MG,         y,c4,rh,'Doc. identificación', data.dui)
+  dCell(doc,MG+c4,      y,c4,rh,'Fecha nacimiento', data.birthDate ? new Date(data.birthDate).toLocaleDateString('es') : '—')
+  dCell(doc,MG+c4*2,    y,c4,rh,'Número contacto',  data.phone)
+  dCell(doc,MG+c4*3,    y,c4,rh,'Sexo',             data.sex)
+  y += rh
+  dCell(doc,MG,         y,c4*2,rh,'Correo electrónico', data.email)
+  dCell(doc,MG+c4*2,    y,c4,  rh,'Estado civil',       data.maritalStatus)
+  y += rh+3
 
-  const col4 = COL / 4
-  const row1h = 14
-  cell(doc, MARGIN,              y, col4, row1h, 'Primer nombre',    data.firstName)
-  cell(doc, MARGIN + col4,       y, col4, row1h, 'Segundo nombre',   data.middleName)
-  cell(doc, MARGIN + col4 * 2,   y, col4, row1h, 'Primer apellido',  data.lastName)
-  cell(doc, MARGIN + col4 * 3,   y, col4, row1h, 'Segundo apellido', data.secondLastName)
-  y += row1h
-
-  cell(doc, MARGIN,              y, col4, row1h, 'Doc. de identificación', data.dui)
-  cell(doc, MARGIN + col4,       y, col4, row1h, 'Fecha de nacimiento',    data.birthDate ? new Date(data.birthDate).toLocaleDateString('es') : '—')
-  cell(doc, MARGIN + col4 * 2,   y, col4, row1h, 'Número de contacto',     data.phone)
-  cell(doc, MARGIN + col4 * 3,   y, col4, row1h, 'Sexo',                   data.sex)
-  y += row1h
-
-  cell(doc, MARGIN,              y, col4 * 2, row1h, 'Correo electrónico', data.email)
-  cell(doc, MARGIN + col4 * 2,   y, col4,     row1h, 'Estado civil',        data.maritalStatus)
-  y += row1h + 3
-
-  // Antecedentes
-  y = sectionHeader(doc, y, 'Antecedentes de enfermedades')
+  y = secHead(doc, y, 'Antecedentes de enfermedades')
   y += 1
-  y = textArea(doc, MARGIN, y, COL, '¿Ha padecido o padece alguna enfermedad crónica?', data.chronicDiseases)
-  y = textArea(doc, MARGIN, y, COL, '¿Padece alguna otra enfermedad no crónica?',        data.nonChronicDiseases)
-  y = textArea(doc, MARGIN, y, COL, '¿Ha recibido o se encuentra recibiendo algún tratamiento médico?', data.medicalTreatments)
+  y = txtBlock(doc,MG,y,COL,'¿Ha padecido o padece alguna enfermedad crónica?',                data.chronicDiseases)
+  y = txtBlock(doc,MG,y,COL,'¿Padece alguna otra enfermedad no crónica?',                      data.nonChronicDiseases)
+  y = txtBlock(doc,MG,y,COL,'¿Ha recibido algún tratamiento médico?',                          data.medicalTreatments)
   y += 2
 
-  // Estilo de vida
-  y = sectionHeader(doc, y, 'Estilo de vida')
+  y = secHead(doc, y, 'Estilo de vida')
   y += 1
-
-  const col2 = COL / 2
+  const c2 = COL/2
   const y0 = y
-  y = textArea(doc, MARGIN,         y, col2 - 1, 'Rutina de sueño',  data.sleepRoutine)
-  const y1 = textArea(doc, MARGIN + col2 + 1, y0, col2 - 1, 'Actividad física', data.physicalActivity)
-  y = Math.max(y, y1)
-
-  cell(doc, MARGIN,         y, col2 - 1, 14, 'Intolerancias alimentarias', data.foodIntolerances)
-  cell(doc, MARGIN + col2 + 1, y, col2 - 1, 14, 'Alimentos que no le gustan', data.dislikedFoods)
+  const yl = txtBlock(doc,MG,        y0,c2-1,'Rutina de sueño',  data.sleepRoutine)
+  const yr = txtBlock(doc,MG+c2+1,   y0,c2-1,'Actividad física', data.physicalActivity)
+  y = Math.max(yl,yr)
+  dCell(doc,MG,       y,c2-1,14,'Intolerancias alimentarias', data.foodIntolerances)
+  dCell(doc,MG+c2+1,  y,c2-1,14,'Alimentos que no le gustan', data.dislikedFoods)
   y += 14
+  const hb = [data.smokes==='si'?'Fuma':'No fuma', data.drinksAlcohol==='si'?'Consume alcohol':'No consume alcohol'].join('  ·  ')
+  dCell(doc,MG,y,COL,10,'Hábitos',hb)
+  y += 10+2
 
-  // Hábitos
-  const habits = [
-    data.smokes === 'si' ? 'Fuma' : 'No fuma',
-    data.drinksAlcohol === 'si' ? 'Consume alcohol' : 'No consume alcohol',
-  ].join('  ·  ')
-  cell(doc, MARGIN, y, COL, 10, 'Hábitos', habits)
-  y += 10 + 2
+  sf(doc,G700); doc.rect(MG,y,COL,5.5,'F')
+  st(doc,G500); doc.setFontSize(7); doc.setFont('helvetica','bold')
+  doc.text('DIETA HABITUAL DE REFERENCIA', MG+2, y+4)
+  y += 6
 
-  // Dieta habitual
-  y = subHeader(doc, y, 'Dieta habitual de referencia')
-  y += 1
+  const dc: number[] = [30,(COL-30)/2,(COL-30)/2]
+  const dh: string[] = ['','Días de semana','Fines de semana']
+  const dr: string[] = ['breakfast','lunch','dinner','snacks','liquids']
+  const dl: string[] = ['Desayuno','Almuerzo','Cena','Refrigerios','Líquidos']
 
-  // Tabla dieta
-  const dcols: number[] = [30, (COL - 30) / 2, (COL - 30) / 2]
-  const headers = ['', 'Días de semana', 'Fines de semana']
-  const rowsD  = ['breakfast', 'lunch', 'dinner', 'snacks', 'liquids']
-  const rowLabels = ['Desayuno', 'Almuerzo', 'Cena', 'Refrigerios', 'Líquidos']
-
-  // Header fila
-  setFill(doc, GREEN_100)
-  doc.rect(MARGIN, y, COL, 6, 'F')
-  let cx = MARGIN
-  headers.forEach((h, i) => {
-    setDraw(doc, GREEN_100)
-    doc.rect(cx, y, dcols[i]!, 6, 'D')
-    setTextColor(doc, INK_500)
-    doc.setFontSize(6.5)
-    doc.setFont('helvetica', 'bold')
-    if (h) doc.text(h.toUpperCase(), cx + 2, y + 4)
-    cx += dcols[i]!
+  sf(doc,G100); doc.rect(MG,y,COL,6,'F')
+  let cx = MG
+  dh.forEach((h,i) => {
+    const w = dc[i] as number
+    sd(doc,G100); doc.rect(cx,y,w,6,'D')
+    if(h){st(doc,I500);doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text(h.toUpperCase(),cx+2,y+4)}
+    cx += w
   })
   y += 6
 
-  rowsD.forEach((key, idx) => {
-    const rowH = 9
-    cx = MARGIN
-    const wdVal = data.dietWeekdays[key as keyof typeof data.dietWeekdays] || '—'
-    const weVal = data.dietWeekends[key as keyof typeof data.dietWeekends] || '—'
-    ;[rowLabels[idx], wdVal, weVal].forEach((val, i) => {
-      const bg = i === 0 ? GREEN_25 : WHITE
-      setFill(doc, bg); setDraw(doc, GREEN_100)
-      doc.rect(cx, y, dcols[i]!, rowH, 'FD')
-      setTextColor(doc, i === 0 ? INK_700 : INK_900)
-      doc.setFontSize(7)
-      doc.setFont('helvetica', i === 0 ? 'bold' : 'normal')
-      doc.text(val, cx + 2, y + 5.5)
-      cx += dcols[i]!
+  dr.forEach((key,idx) => {
+    const rH=9; cx=MG
+    const wd = (data.dietWeekdays as Record<string,string>)[key] ?? '—'
+    const we = (data.dietWeekends as Record<string,string>)[key] ?? '—'
+    const rv: string[] = [dl[idx] as string, wd, we]
+    rv.forEach((val,i) => {
+      const w = dc[i] as number
+      sf(doc,i===0?G25:WHT); sd(doc,G100); doc.rect(cx,y,w,rH,'FD')
+      st(doc,i===0?I700:I900); doc.setFontSize(7); doc.setFont('helvetica',i===0?'bold':'normal')
+      doc.text(val,cx+2,y+5.5)
+      cx += w
     })
-    y += rowH
+    y += rH
   })
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PÁGINA 2 — Medidas + Motivación + Próxima cita
-  // ──────────────────────────────────────────────────────────────────────────
   doc.addPage()
-  pageHeader(doc, caseNumber, fullName, 2, TOTAL_PAGES)
+  pgHead(doc,caseNumber,nm,2,TOT)
   y = 17
 
-  y = sectionHeader(doc, y, 'Estado actual y evolución de medidas')
+  y = secHead(doc,y,'Estado actual y evolución de medidas')
   y += 1
-
-  // Tabla medidas
-  const mcols: number[] = [30, 25, 30, 30, 28, 28]
-  const mHeaders = ['Medida', 'Meta', 'Anterior', 'Actual · hoy', 'Δ vs anterior', 'Δ total']
-  const MEASURES_PDF = [
-    { key: 'weight', label: 'Peso (kg)' },
-    { key: 'height', label: 'Talla (m)' },
-    { key: 'waist',  label: 'Cintura (cm)' },
-    { key: 'hip',    label: 'Cadera (cm)' },
-    { key: 'arm',    label: 'Brazo (cm)' },
-    { key: 'chest',  label: 'Pecho (cm)' },
-    { key: 'thigh',  label: 'Muslo (cm)' },
-    { key: 'bmi',    label: 'IMC' },
+  const mc: number[] = [30,25,30,30,28,28]
+  const mh: string[] = ['Medida','Meta','Anterior','Actual · hoy','Δ vs anterior','Δ total']
+  const mr: {key:string;label:string}[] = [
+    {key:'weight',label:'Peso (kg)'},{key:'height',label:'Talla (m)'},
+    {key:'waist',label:'Cintura (cm)'},{key:'hip',label:'Cadera (cm)'},
+    {key:'arm',label:'Brazo (cm)'},{key:'chest',label:'Pecho (cm)'},
+    {key:'thigh',label:'Muslo (cm)'},{key:'bmi',label:'IMC'},
   ]
 
-  setFill(doc, GREEN_100); doc.rect(MARGIN, y, COL, 6, 'F')
-  cx = MARGIN
-  mHeaders.forEach((h, i) => {
-    setDraw(doc, GREEN_100); doc.rect(cx, y, mcols[i]!, 6, 'D')
-    setTextColor(doc, INK_500); doc.setFontSize(6); doc.setFont('helvetica', 'bold')
-    doc.text(h.toUpperCase(), cx + 1.5, y + 4)
-    cx += mcols[i]!
+  sf(doc,G100); doc.rect(MG,y,COL,6,'F')
+  cx=MG
+  mh.forEach((h,i) => {
+    const w = mc[i] as number
+    sd(doc,G100); doc.rect(cx,y,w,6,'D')
+    st(doc,I500); doc.setFontSize(6); doc.setFont('helvetica','bold')
+    doc.text(h.toUpperCase(),cx+1.5,y+4)
+    cx += w
   })
   y += 6
 
-  MEASURES_PDF.forEach(({ key, label }) => {
+  mr.forEach(({key,label}) => {
     const m = data.measures[key as keyof typeof data.measures]
-    const prev = m.previous ? parseFloat(m.previous) : null
-    const curr = m.current  ? parseFloat(m.current)  : null
-    const init = m.previous ? parseFloat(m.previous) : null
-    const diff = prev && curr ? curr - prev : null
-    const diffTotal = init && curr ? curr - init : null
-
-    const rowH = 7
-    cx = MARGIN
-    const vals = [
-      label,
-      m.goal || '—',
-      m.previous || '—',
-      m.current || '—',
-      diff !== null ? (diff < 0 ? `▼ ${Math.abs(diff).toFixed(1)}` : `▲ ${diff.toFixed(1)}`) : '—',
-      diffTotal !== null ? (diffTotal < 0 ? `▼ ${Math.abs(diffTotal).toFixed(1)}` : `▲ ${diffTotal.toFixed(1)}`) : '—',
+    const pv = m.previous ? parseFloat(m.previous) : null
+    const cv = m.current  ? parseFloat(m.current)  : null
+    const df = pv!==null&&cv!==null ? cv-pv : null
+    const rH=7; cx=MG
+    const vs: string[] = [
+      label, m.goal||'—', m.previous||'—', m.current||'—',
+      df!==null?(df<0?`▼ ${Math.abs(df).toFixed(1)}`:`▲ ${df.toFixed(1)}`):'—',
+      df!==null?(df<0?`▼ ${Math.abs(df).toFixed(1)}`:`▲ ${df.toFixed(1)}`):'—',
     ]
-    vals.forEach((val, i) => {
-      const isTrend = i >= 4
-      const bg = i === 0 ? GREEN_25 : WHITE
-      setFill(doc, bg); setDraw(doc, GREEN_100)
-      doc.rect(cx, y, mcols[i]!, rowH, 'FD')
-      const color = isTrend && val.startsWith('▼') ? '#2D7A3A' : isTrend && val.startsWith('▲') ? '#C0392B' : i === 0 ? INK_700 : INK_900
-      setTextColor(doc, color)
-      doc.setFontSize(7.5); doc.setFont('helvetica', i === 0 ? 'bold' : 'normal')
-      doc.text(val, cx + 1.5, y + 5)
-      cx += mcols[i]!
+    vs.forEach((val,i) => {
+      const w = mc[i] as number
+      const isTr = i>=4
+      sf(doc,i===0?G25:WHT); sd(doc,G100); doc.rect(cx,y,w,rH,'FD')
+      const col = isTr&&val.startsWith('▼')?'#2D7A3A':isTr&&val.startsWith('▲')?'#C0392B':i===0?I700:I900
+      st(doc,col); doc.setFontSize(7.5); doc.setFont('helvetica',i===0?'bold':'normal')
+      doc.text(val,cx+1.5,y+5)
+      cx += w
     })
-    y += rowH
+    y += rH
   })
   y += 3
 
-  // Motivación + Asesoría
-  y = sectionHeader(doc, y, 'Motivación y asesoría personalizada')
+  y = secHead(doc,y,'Motivación y asesoría personalizada')
   y += 1
+  const lw2 = c2-1; const rx2 = MG+c2+1; const ly2 = y
+  sf(doc,G700); doc.rect(MG,ly2,lw2,36,'F')
+  st(doc,G500); doc.setFontSize(6); doc.setFont('helvetica','bold')
+  doc.text('MOTIVACIÓN PRINCIPAL',MG+3,ly2+6)
+  st(doc,WHT); doc.setFontSize(8); doc.setFont('helvetica','normal')
+  const ml = doc.splitTextToSize(data.motivation||'—',lw2-6) as string[]
+  doc.text(ml,MG+3,ly2+11)
+  const ry2 = txtBlock(doc,rx2,ly2,c2-1,'Asesoría personalizada',data.personalizedAdvice??'')
+  y = Math.max(ly2+38,ry2)+3
 
-  const leftW  = COL / 2 - 1
-  const rightW = COL / 2 - 1
-  const leftX  = MARGIN
-  const rightX = MARGIN + leftW + 2
-
-  // Feature card izquierda
-  setFill(doc, GREEN_700); doc.rect(leftX, y, leftW, 40, 'F')
-  // Círculo decorativo
-  setFill(doc, 'rgba(255,255,255,0.08)')
-  doc.setFillColor(255, 255, 255, 0.08 as any)
-  doc.circle(leftX + leftW - 5, y + 35, 12, 'F')
-
-  setTextColor(doc, GREEN_500); doc.setFontSize(6); doc.setFont('helvetica', 'bold')
-  doc.text('MOTIVACIÓN PRINCIPAL', leftX + 3, y + 6)
-  setTextColor(doc, WHITE); doc.setFontSize(8); doc.setFont('helvetica', 'normal')
-  const motLines = doc.splitTextToSize(data.motivation || '—', leftW - 6)
-  doc.text(motLines, leftX + 3, y + 11)
-
-  y = textArea(doc, rightX, y, rightW, 'Asesoría personalizada', data.personalizedAdvice)
-  y += 3
-
-  // Próxima cita
-  y = sectionHeader(doc, y, 'Próxima cita')
+  y = secHead(doc,y,'Próxima cita')
   y += 1
-
-  setFill(doc, GREEN_950); doc.rect(MARGIN, y, COL, 18, 'F')
-  setTextColor(doc, GREEN_500); doc.setFontSize(6); doc.setFont('helvetica', 'bold')
-  doc.text('FECHA PROGRAMADA', MARGIN + 3, y + 5)
-  setTextColor(doc, WHITE); doc.setFontSize(11); doc.setFont('helvetica', 'bold')
-  const apptDate = data.nextAppointment
-    ? new Date(data.nextAppointment).toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  sf(doc,G950); doc.rect(MG,y,COL,18,'F')
+  st(doc,G500); doc.setFontSize(6); doc.setFont('helvetica','bold')
+  doc.text('FECHA PROGRAMADA',MG+3,y+5)
+  st(doc,WHT); doc.setFontSize(11); doc.setFont('helvetica','bold')
+  const ad = data.nextAppointment
+    ? new Date(data.nextAppointment).toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
     : '—'
-  doc.text(apptDate.charAt(0).toUpperCase() + apptDate.slice(1), MARGIN + 3, y + 13)
-  y += 18 + 3
+  doc.text(ad.charAt(0).toUpperCase()+ad.slice(1),MG+3,y+13)
+  y += 21
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PÁGINA 3 — Plan alimenticio semanal
-  // ──────────────────────────────────────────────────────────────────────────
   doc.addPage()
-  pageHeader(doc, caseNumber, fullName, 3, TOTAL_PAGES)
+  pgHead(doc,caseNumber,nm,3,TOT)
   y = 17
 
-  const monthYear = data.nextAppointment
-    ? new Date(data.nextAppointment).toLocaleDateString('es', { month: 'long', year: 'numeric' }).toUpperCase()
-    : new Date().toLocaleDateString('es', { month: 'long', year: 'numeric' }).toUpperCase()
-
-  y = sectionHeader(doc, y, `Plan de alimentación semanal — ${monthYear}`)
+  const my = data.nextAppointment
+    ? new Date(data.nextAppointment).toLocaleDateString('es',{month:'long',year:'numeric'}).toUpperCase()
+    : new Date().toLocaleDateString('es',{month:'long',year:'numeric'}).toUpperCase()
+  y = secHead(doc,y,`Plan de alimentación semanal — ${my}`)
   y += 1
 
-  // Chips de intolerancias
-  if (data.foodIntolerances) {
-    const chips = data.foodIntolerances.split(',').map((s) => s.trim()).filter(Boolean)
-    setTextColor(doc, INK_500); doc.setFontSize(6.5); doc.setFont('helvetica', 'bold')
-    doc.text('Sin: ', MARGIN, y + 3.5)
-    let chipX = MARGIN + 8
-    chips.forEach((chip) => {
-      setFill(doc, GREEN_100); setDraw(doc, GREEN_100)
-      const w = doc.getTextWidth(chip) + 5
-      doc.roundedRect(chipX, y, w, 5, 1, 1, 'FD')
-      setTextColor(doc, GREEN_700); doc.setFont('helvetica', 'normal')
-      doc.text(chip, chipX + 2.5, y + 3.5)
-      chipX += w + 2
+  if(data.foodIntolerances){
+    const chips = data.foodIntolerances.split(',').map(s=>s.trim()).filter(Boolean)
+    st(doc,I500); doc.setFontSize(6.5); doc.setFont('helvetica','bold')
+    doc.text('Sin: ',MG,y+3.5)
+    let chx = MG+8
+    chips.forEach(chip => {
+      sf(doc,G100); sd(doc,G200)
+      const w = doc.getTextWidth(chip)+5
+      doc.roundedRect(chx,y,w,5,1,1,'FD')
+      st(doc,G700); doc.setFont('helvetica','normal')
+      doc.text(chip,chx+2.5,y+3.5)
+      chx += w+2
     })
     y += 7
   }
 
-  // Tabla plan alimenticio
-  const days = ['LUNES', 'MARTES', 'MIÉRC.', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO']
-  const mealCols = ['Desayuno', 'Almuerzo', 'Cena', 'Meriendas']
-  const planCols: number[] = [16, (COL - 16) / 4, (COL - 16) / 4, (COL - 16) / 4, (COL - 16) / 4]
+  const pc: number[] = [16,(COL-16)/4,(COL-16)/4,(COL-16)/4,(COL-16)/4]
+  const mcl: string[] = ['Desayuno','Almuerzo','Cena','Meriendas']
+  const dyl: string[] = ['LUNES','MARTES','MIÉRC.','JUEVES','VIERNES','SÁBADO','DOMINGO']
 
-  // Header
-  setFill(doc, GREEN_950); doc.rect(MARGIN, y, COL, 7, 'F')
-  cx = MARGIN
-  ;['', ...mealCols].forEach((h, i) => {
-    setDraw(doc, GREEN_700); doc.rect(cx, y, planCols[i]!, 7, 'D')
-    setTextColor(doc, WHITE); doc.setFontSize(6.5); doc.setFont('helvetica', 'bold')
-    if (h) doc.text(h.toUpperCase(), cx + 1.5, y + 4.5)
-    cx += planCols[i]!
+  sf(doc,G950); doc.rect(MG,y,COL,7,'F')
+  cx=MG
+  ;(['', ...mcl] as string[]).forEach((h,i) => {
+    const w = pc[i] as number
+    sd(doc,G700); doc.rect(cx,y,w,7,'D')
+    st(doc,WHT); doc.setFontSize(6.5); doc.setFont('helvetica','bold')
+    if(h) doc.text(h.toUpperCase(),cx+1.5,y+4.5)
+    cx += w
   })
   y += 7
 
-  data.mealPlan.forEach((row, idx) => {
-    const rowValues = [row.breakfast, row.lunch, row.dinner, row.snacks]
-    const maxLines = Math.max(...rowValues.map((v) =>
-      doc.splitTextToSize(v || ' ', planCols[1] - 3).length
-    ))
-    const rowH = Math.max(10, maxLines * 3.5 + 4)
-
-    cx = MARGIN
-    // Día
-    setFill(doc, GREEN_25); setDraw(doc, GREEN_100)
-    doc.rect(cx, y, planCols[0], rowH, 'FD')
-    setTextColor(doc, GREEN_950); doc.setFontSize(6.5); doc.setFont('helvetica', 'bold')
-    doc.text(days[idx], cx + 1.5, y + rowH / 2 + 1.5)
-    cx += planCols[0]
-
-    rowValues.forEach((val, i) => {
-      setFill(doc, i % 2 === 0 ? WHITE : CREAM); setDraw(doc, GREEN_100)
-      doc.rect(cx, y, planCols[i + 1], rowH, 'FD')
-      setTextColor(doc, INK_700); doc.setFontSize(7); doc.setFont('helvetica', 'normal')
-      const lines = doc.splitTextToSize(val || '—', planCols[i + 1] - 3)
-      doc.text(lines, cx + 1.5, y + 4)
-      cx += planCols[i + 1]
+  data.mealPlan.forEach((row,idx) => {
+    const rv: string[] = [row.breakfast,row.lunch,row.dinner,row.snacks]
+    const maxL = Math.max(...rv.map(v => (doc.splitTextToSize(v||' ',(pc[1] as number)-3) as string[]).length))
+    const rH = Math.max(10,maxL*3.5+4)
+    cx=MG
+    sf(doc,G25); sd(doc,G100); doc.rect(cx,y,pc[0] as number,rH,'FD')
+    st(doc,G950); doc.setFontSize(6.5); doc.setFont('helvetica','bold')
+    doc.text(dyl[idx] as string,cx+1.5,y+rH/2+1.5)
+    cx += pc[0] as number
+    rv.forEach((val,i) => {
+      const w = pc[i+1] as number
+      sf(doc,i%2===0?WHT:CRM); sd(doc,G100); doc.rect(cx,y,w,rH,'FD')
+      st(doc,I700); doc.setFontSize(7); doc.setFont('helvetica','normal')
+      const lines = doc.splitTextToSize(val||'—',w-3) as string[]
+      doc.text(lines,cx+1.5,y+4)
+      cx += w
     })
-    y += rowH
+    y += rH
   })
-  y += 4
 
-  // Notas finales
-  if (data.foodIntolerances || data.personalizedAdvice) {
-    const notesCols = 3
-    const noteW = COL / notesCols - 1
-    const notes = [
-      { title: 'HIDRATACIÓN', body: 'Mínimo 3 L de agua al día.' },
-      data.foodIntolerances ? { title: `SIN: ${data.foodIntolerances.split(',')[0]?.toUpperCase()}`, body: data.foodIntolerances } : null,
-      data.personalizedAdvice ? { title: 'ACTIVIDAD FÍSICA SUGERIDA', body: data.personalizedAdvice.slice(0, 120), highlight: true } : null,
-    ].filter(Boolean) as { title: string; body: string; highlight?: boolean }[]
-
-    notes.slice(0, 3).forEach((note, i) => {
-      const nx = MARGIN + i * (noteW + 1)
-      const bg = note.highlight ? GREEN_700 : CREAM
-      const border = note.highlight ? GREEN_500 : GREEN_200
-      setFill(doc, bg); setDraw(doc, border)
-      doc.rect(nx, y, noteW, 20, 'FD')
-      setTextColor(doc, note.highlight ? GREEN_500 : GREEN_700)
-      doc.setFontSize(6.5); doc.setFont('helvetica', 'bold')
-      doc.text(note.title, nx + 2, y + 5)
-      setTextColor(doc, note.highlight ? WHITE : INK_700)
-      doc.setFontSize(7); doc.setFont('helvetica', 'normal')
-      const bLines = doc.splitTextToSize(note.body, noteW - 4)
-      doc.text(bLines.slice(0, 4), nx + 2, y + 10)
-    })
-  }
-
-  // ── Save ──────────────────────────────────────────────────────────────────
-  const filename = `feel-better-consulta-${caseNumber}-${fullName.replace(/\s+/g, '-').toLowerCase()}.pdf`
-  doc.save(filename)
+  const fn2 = `feel-better-consulta-${caseNumber}-${nm.replace(/\s+/g,'-').toLowerCase()}.pdf`
+  doc.save(fn2)
 }
