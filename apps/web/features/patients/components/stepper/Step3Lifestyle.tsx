@@ -69,7 +69,7 @@ function ChipInput({
   label, items, onAdd, onRemove, placeholder, error,
 }: {
   label: string; items: string[]; onAdd: (v: string) => void
-  onRemove: (v: string) => void; placeholder?: string; error?: string
+  onRemove: (v: string) => void; placeholder?: string | undefined; error?: string | undefined
 }) {
   const [input, setInput] = useState('')
 
