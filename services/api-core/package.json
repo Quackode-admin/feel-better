@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "npx nest start --watch",
+    "dev": "rm -f tsconfig.tsbuildinfo && npx tsc --watch",
     "build": "npx nest build",
     "start": "node dist/main",
     "typecheck": "tsc --noEmit",
@@ -27,6 +27,7 @@
     "@nestjs/swagger": "^7.4.0",
     "@prisma/client": "^5.22.0",
     "@types/passport-jwt": "^4.0.1",
+    "@types/uuid": "^11.0.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "bcryptjs": "^2.4.3",
@@ -37,8 +38,10 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.12.4",
     "rxjs": "^7.8.1",
-    "svix": "^1.93.0"
+    "svix": "^1.93.0",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.0",
@@ -48,6 +51,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^20.0.0",
     "prisma": "^5.22.0",
+    "ts-loader": "^9.5.7",
     "typescript": "^5.5.0"
   }
 }

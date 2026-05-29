@@ -1,11 +1,6 @@
 // =============================================================================
 // Feel Better — Prisma Schema
 // =============================================================================
-// Para aplicar cambios:
-//   pnpm --filter api-core db:migrate:dev --name nombre_del_cambio
-// Para producción:
-//   pnpm --filter api-core db:migrate
-// =============================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -55,6 +50,27 @@ enum DocumentType {
   other
 }
 
+enum NutritionistStatus {
+  pending_invitation
+  active
+  disabled
+  deleted
+}
+
+enum InvitationStatus {
+  pending
+  accepted
+  expired
+  revoked
+}
+
+enum PatientStatus {
+  active
+  unassigned
+  in_treatment
+  inactive
+}
+
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 model User {
@@ -69,7 +85,6 @@ model User {
   nutritionist Nutritionist?
   guardian     Guardian?
 
-  // Audit fields — obligatorios en todas las tablas
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
@@ -81,23 +96,56 @@ model User {
 }
 
 model Profile {
-  id        String    @id @default(uuid())
-  userId    String    @unique @map("user_id")
-  fullName  String    @map("full_name")
-  birthDate DateTime? @map("birth_date")
-  gender    Gender?
-  avatarUrl String?   @map("avatar_url")
-  phone     String?
+  id          String    @id @default(uuid())
+  userId      String    @unique @map("user_id")
+  fullName    String    @map("full_name")
+  birthDate   DateTime? @map("birth_date")
+  gender      Gender?
+  avatarUrl   String?   @map("avatar_url")
+  phone       String?
+  country     String?
+  address     String?
+  idDocument  String?   @map("id_document")
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-  createdById String? @map("created_by_id")
-  updatedById String? @map("updated_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdById String?   @map("created_by_id")
+  updatedById String?   @map("updated_by_id")
 
   @@map("profiles")
+}
+
+// ─── Invitations ─────────────────────────────────────────────────────────────
+
+model Invitation {
+  id          String           @id @default(uuid())
+  email       String
+  tokenHash   String           @unique @map("token_hash")
+  expiresAt   DateTime         @map("expires_at")
+  acceptedAt  DateTime?        @map("accepted_at")
+  status      InvitationStatus @default(pending)
+
+  firstName   String           @map("first_name")
+  lastName    String           @map("last_name")
+  specialty   String
+  phone       String?
+  country     String?
+  clinic      String?
+
+  createdById String           @map("created_by_id")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  updatedById String?   @map("updated_by_id")
+
+  @@index([email])
+  @@index([tokenHash])
+  @@index([status])
+  @@map("invitations")
 }
 
 // ─── Patients ────────────────────────────────────────────────────────────────
@@ -106,6 +154,7 @@ model Patient {
   id                  String        @id @default(uuid())
   userId              String        @unique @map("user_id")
   nutritionistId      String?       @map("nutritionist_id")
+  status              PatientStatus @default(active)
   heightCm            Decimal?      @map("height_cm") @db.Decimal(5, 1)
   initialWeightKg     Decimal?      @map("initial_weight_kg") @db.Decimal(6, 2)
   targetWeightKg      Decimal?      @map("target_weight_kg") @db.Decimal(6, 2)
@@ -129,15 +178,24 @@ model Patient {
   updatedById  String?   @map("updated_by_id")
 
   @@index([nutritionistId])
+  @@index([status])
   @@map("patients")
 }
 
+// ─── Nutritionists ────────────────────────────────────────────────────────────
+
 model Nutritionist {
-  id             String      @id @default(uuid())
-  userId         String      @unique @map("user_id")
-  licenseNumber  String?     @map("license_number")
+  id             String             @id @default(uuid())
+  userId         String             @unique @map("user_id")
+  status         NutritionistStatus @default(pending_invitation)
+  licenseNumber  String?            @map("license_number")
   specialties    String[]
   bio            String?
+  yearsExp       Int?               @map("years_exp")
+  clinic         String?
+  certifications String[]
+  country        String?
+  phone          String?
 
   user           User        @relation(fields: [userId], references: [id])
   patients       Patient[]
@@ -150,6 +208,7 @@ model Nutritionist {
   createdById  String?   @map("created_by_id")
   updatedById  String?   @map("updated_by_id")
 
+  @@index([status])
   @@map("nutritionists")
 }
 
@@ -268,11 +327,11 @@ model ChatChannel {
 
   auditLogs         ChatAuditLog[]
 
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
-  createdByUserId String? @map("created_by_user_id")
-  updatedByUserId String? @map("updated_by_user_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+  createdByUserId   String?   @map("created_by_user_id")
+  updatedByUserId   String?   @map("updated_by_user_id")
 
   @@index([patientId])
   @@index([nutritionistId])
@@ -289,11 +348,11 @@ model ChatAuditLog {
 
   channel           ChatChannel @relation(fields: [streamChannelId], references: [streamChannelId])
 
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
-  createdByUserId String? @map("created_by_user_id")
-  updatedByUserId String? @map("updated_by_user_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+  createdByUserId   String?   @map("created_by_user_id")
+  updatedByUserId   String?   @map("updated_by_user_id")
 
   @@index([streamChannelId])
   @@index([eventType])

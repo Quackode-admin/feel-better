@@ -11,6 +11,9 @@ import { NutritionModule } from './nutrition/nutrition.module'
 import { AppointmentsModule } from './appointments/appointments.module'
 import { TrackingModule } from './tracking/tracking.module'
 import { AuthModule } from './auth/auth.module'
+import { NutritionistsModule } from './nutritionists/nutritionists.module'
+import { InvitationsModule } from './invitations/invitations.module'
+import { OnboardingModule } from './onboarding/onboarding.module'
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import { AuthModule } from './auth/auth.module'
     NutritionModule,
     AppointmentsModule,
     TrackingModule,
+    NutritionistsModule,
+    InvitationsModule,
+    OnboardingModule,
   ],
   controllers: [AppController],
 })
