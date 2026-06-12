@@ -20,6 +20,27 @@ importers:
 
   apps/admin:
     dependencies:
+      '@clerk/nextjs':
+        specifier: ^5.7.2
+        version: 5.7.2(next@16.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@hookform/resolvers':
+        specifier: ^5.2.2
+        version: 5.2.2(react-hook-form@7.75.0(react@19.2.4))
+      '@tanstack/react-query':
+        specifier: ^5.100.10
+        version: 5.100.10(react@19.2.4)
+      '@tanstack/react-query-devtools':
+        specifier: ^5.100.10
+        version: 5.100.10(@tanstack/react-query@5.100.10(react@19.2.4))(react@19.2.4)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: ^1.16.0
+        version: 1.16.0(react@19.2.4)
       next:
         specifier: 16.2.9
         version: 16.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -29,6 +50,15 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      react-hook-form:
+        specifier: ^7.75.0
+        version: 7.75.0(react@19.2.4)
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
+      zod:
+        specifier: ^3.23.0
+        version: 3.25.76
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -6955,6 +6985,17 @@ snapshots:
       - react
       - react-dom
 
+  '@clerk/backend@1.13.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@clerk/shared': 2.9.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@clerk/types': 4.25.0
+      cookie: 0.7.0
+      snakecase-keys: 5.4.4
+      tslib: 2.4.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
   '@clerk/backend@3.4.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@clerk/shared': 4.11.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -6970,6 +7011,14 @@ snapshots:
       '@clerk/types': 4.25.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+      tslib: 2.4.1
+
+  '@clerk/clerk-react@5.11.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@clerk/shared': 2.9.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@clerk/types': 4.25.0
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
       tslib: 2.4.1
 
   '@clerk/express@2.1.16(express@5.2.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
@@ -6995,6 +7044,19 @@ snapshots:
       server-only: 0.0.1
       tslib: 2.4.1
 
+  '@clerk/nextjs@5.7.2(next@16.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@clerk/backend': 1.13.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@clerk/clerk-react': 5.11.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@clerk/shared': 2.9.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@clerk/types': 4.25.0
+      crypto-js: 4.2.0
+      next: 16.2.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      server-only: 0.0.1
+      tslib: 2.4.1
+
   '@clerk/shared@2.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@clerk/types': 4.25.0
@@ -7005,6 +7067,17 @@ snapshots:
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  '@clerk/shared@2.9.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@clerk/types': 4.25.0
+      glob-to-regexp: 0.4.1
+      js-cookie: 3.0.5
+      std-env: 3.10.0
+      swr: 2.4.1(react@19.2.4)
+    optionalDependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@clerk/shared@4.11.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -7149,6 +7222,11 @@ snapshots:
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.75.0(react@18.3.1)
+
+  '@hookform/resolvers@5.2.2(react-hook-form@7.75.0(react@19.2.4))':
+    dependencies:
+      '@standard-schema/utils': 0.3.0
+      react-hook-form: 7.75.0(react@19.2.4)
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -8582,10 +8660,21 @@ snapshots:
       '@tanstack/react-query': 5.100.10(react@18.3.1)
       react: 18.3.1
 
+  '@tanstack/react-query-devtools@5.100.10(@tanstack/react-query@5.100.10(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@tanstack/query-devtools': 5.100.10
+      '@tanstack/react-query': 5.100.10(react@19.2.4)
+      react: 19.2.4
+
   '@tanstack/react-query@5.100.10(react@18.3.1)':
     dependencies:
       '@tanstack/query-core': 5.100.10
       react: 18.3.1
+
+  '@tanstack/react-query@5.100.10(react@19.2.4)':
+    dependencies:
+      '@tanstack/query-core': 5.100.10
+      react: 19.2.4
 
   '@tokenizer/inflate@0.2.7':
     dependencies:
@@ -11203,6 +11292,10 @@ snapshots:
     dependencies:
       react: 18.3.1
 
+  lucide-react@1.16.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
   magic-string@0.30.17:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -12217,6 +12310,10 @@ snapshots:
     dependencies:
       react: 18.3.1
 
+  react-hook-form@7.75.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
   react-is@16.13.1: {}
 
   react-markdown@9.1.0(@types/react@18.3.28)(react@18.3.1):
@@ -12978,6 +13075,12 @@ snapshots:
       react: 18.3.1
       use-sync-external-store: 1.6.0(react@18.3.1)
 
+  swr@2.4.1(react@19.2.4):
+    dependencies:
+      dequal: 2.0.3
+      react: 19.2.4
+      use-sync-external-store: 1.6.0(react@19.2.4)
+
   symbol-observable@4.0.0: {}
 
   tabbable@6.4.0: {}
@@ -13363,6 +13466,10 @@ snapshots:
   use-sync-external-store@1.6.0(react@18.3.1):
     dependencies:
       react: 18.3.1
+
+  use-sync-external-store@1.6.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
 
   util-deprecate@1.0.2: {}
 
