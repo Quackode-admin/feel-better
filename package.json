@@ -29,6 +29,63 @@
       "@prisma/client",
       "@prisma/engines",
       "prisma"
-    ]
+    ],
+    "packageExtensions": {
+      "lucide-react": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "next": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "@clerk/nextjs": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "@clerk/clerk-react": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "sonner": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "radix-ui": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "stream-chat-react": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "react-hook-form": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "@hookform/resolvers": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "@tanstack/react-query": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      },
+      "@tanstack/react-query-devtools": {
+        "peerDependencies": {
+          "@types/react": "*"
+        }
+      }
+    }
   }
 }
